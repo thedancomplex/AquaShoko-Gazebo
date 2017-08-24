@@ -1,0 +1,590 @@
+#include <boost/bind.hpp>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/common/common.hh>
+#include <stdio.h>
+#include <gazebo/common/Time.hh>
+#include <boost/filesystem.hpp>
+#include <ctime>
+
+
+//PID values Jaw
+int ProJaw = 80; //proportional control
+int InteJaw = 10; //integral control
+int DereJaw = 40; //derivative control
+//PID values Pitch #2
+int ProPitch1 = 200; //proportional control
+int IntePitch1 = 50; //integral control
+int DerePitch1 = 100; //derivative control
+//PID values Pitch #2
+int ProPitch2 = 150; //proportional control
+int IntePitch2 = 0; //integral control
+int DerePitch2 = 50; //derivative control
+
+//for use in reading joint position			
+int arrayJointPositions[12] = {}; 	
+//for use to request joint position
+int arrayJointRequest[12] = {};	
+
+
+//status
+bool busy = false;
+//poses  
+bool store = false;
+bool home = false;
+//Model Rotations
+bool modelCCw= false;
+bool modelCw = false;
+//Model Walks, number(s) indicate leading leg(s)
+bool modelWalk12 = false;
+bool modelWalk23 = false;
+bool modelWalk34 = false;
+bool modelWalk41 = false;
+bool modelWalk1 = false;
+bool modelWalk2 = false;
+bool modelWalk3 = false;
+bool modelWalk4 = false;
+
+//pose transitions
+bool step1,  step2,  step3,  step4,  step5,  step6,  step7,  step8,  step9,  step10,
+	 step11, step12, step13, step14, step15, step16, step17, step18, step19, step20,
+	 step21, step22, step23, step24, step25, step26, step27, step28, step29, step30, 
+	 step41, step42, step43, step44, step45, step46, step47, step48, step49, step50 = true;
+
+
+namespace gazebo
+{
+  class roboControl : public ModelPlugin
+  {
+  
+    public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
+    {
+		// Store the pointer to the model
+		this->model = _parent;
+		
+		
+		//  -----------------------------  Joint Controller Setup -----------------------------
+		//Store the pointer to controller
+		this->ShokoControl = new physics::JointController(_parent);
+		// Setup a PID controller
+ 		this->pid11 = common::PID(ProJaw, InteJaw, DereJaw);
+ 		this->pid21 = common::PID(ProJaw, InteJaw, DereJaw);
+ 		this->pid31 = common::PID(ProJaw, InteJaw, DereJaw);
+ 		this->pid41 = common::PID(ProJaw, InteJaw, DereJaw);
+ 			this->pid12 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 			this->pid22 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 			this->pid32 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 			this->pid42 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 				this->pid13 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				this->pid23 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				this->pid33 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				this->pid43 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				
+ 		this->ID11 = this->model->GetJoint("jaw11");
+ 		this->ID21 = this->model->GetJoint("jaw21");
+ 		this->ID31 = this->model->GetJoint("jaw31");
+ 		this->ID41 = this->model->GetJoint("jaw41");
+ 			this->ID12 = this->model->GetJoint("pitch12");
+ 			this->ID22 = this->model->GetJoint("pitch22");
+ 			this->ID32 = this->model->GetJoint("pitch32");
+ 			this->ID42 = this->model->GetJoint("pitch42");
+ 				this->ID13 = this->model->GetJoint("pitch13");
+ 				this->ID23 = this->model->GetJoint("pitch23");
+ 				this->ID33 = this->model->GetJoint("pitch33");
+ 				this->ID43 = this->model->GetJoint("pitch43");
+
+ 		this->model->GetJointController()->SetPositionPID(this->ID11->GetScopedName(), this->pid11);
+  		this->model->GetJointController()->SetPositionPID(this->ID21->GetScopedName(), this->pid21);
+		this->model->GetJointController()->SetPositionPID(this->ID31->GetScopedName(), this->pid31);
+		this->model->GetJointController()->SetPositionPID(this->ID41->GetScopedName(), this->pid41);
+			this->model->GetJointController()->SetPositionPID(this->ID12->GetScopedName(), this->pid12);
+			this->model->GetJointController()->SetPositionPID(this->ID22->GetScopedName(), this->pid22);
+			this->model->GetJointController()->SetPositionPID(this->ID32->GetScopedName(), this->pid32);
+			this->model->GetJointController()->SetPositionPID(this->ID42->GetScopedName(), this->pid42);
+				this->model->GetJointController()->SetPositionPID(this->ID13->GetScopedName(), this->pid13);
+				this->model->GetJointController()->SetPositionPID(this->ID23->GetScopedName(), this->pid23);
+				this->model->GetJointController()->SetPositionPID(this->ID33->GetScopedName(), this->pid33);
+				this->model->GetJointController()->SetPositionPID(this->ID43->GetScopedName(), this->pid43);
+			//  -----------------------------  Joint Controller Setup End  -----------------------------	
+		
+		// Listen to the update event. This event is broadcast every
+		// simulation iteration.
+    	this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&roboControl::OnUpdate, this, _1));
+    	std::cout << "*************************** roboControl ******************************" << std::endl;	
+    	std::cout << "--------- Controller PID Jaw:" <<" P:" << ProJaw <<" I:" << InteJaw << " D:"<< DereJaw <<std::endl;
+    	std::cout << "------ Controller PID Pitch1:" <<" P:" << ProPitch1 <<" I:" << IntePitch1 << " D:"<< DerePitch1 <<std::endl;
+    	std::cout << "------ Controller PID Pitch2:" <<" P:" << ProPitch2 <<" I:" << IntePitch2 << " D:"<< DerePitch2 <<std::endl;
+	
+    }
+     
+  
+     
+// _----__--_-_-__-_-- Called by the world update start event  -----___-----__------__----___----loop that makes the stuff happen _______----______------_________------_____---
+	public: void OnUpdate(const common::UpdateInfo & /*_info*/)
+	{	
+		if(store == false)
+			{
+				Store();
+			}
+		if(store == true && home == false)
+			{
+				Home();
+			}	
+		if(home == true && modelCCw == false)
+			{
+				ModelCCw();
+			}	
+		
+														
+	}
+	
+    //  ----------------------------- Pointer to the model -----------------------------
+    private: physics::ModelPtr model;
+    // Pointer to the update event connection
+    public: physics::JointPtr ID11;
+    public: physics::JointPtr ID21;
+    public: physics::JointPtr ID31;
+    public: physics::JointPtr ID41;
+    	public: physics::JointPtr ID12;
+    	public: physics::JointPtr ID22;
+    	public: physics::JointPtr ID32;
+    	public: physics::JointPtr ID42;
+    		public: physics::JointPtr ID13;
+    		public: physics::JointPtr ID23;
+    		public: physics::JointPtr ID33;
+    		public: physics::JointPtr ID43;
+	//important Stuff
+    private: event::ConnectionPtr updateConnection;
+    //Pointer to controller
+    private: physics::JointController * ShokoControl;
+	/// \brief A PID controller for the joint.
+	private: common::PID pid11,pid21,pid31,pid41,
+							pid12,pid22,pid32,pid42,
+								pid13,pid23,pid33,pid43;
+
+
+// ----------------------------- Start Functions -----------------------------
+    void getJointPositions()
+    {
+    	math::Angle id11 = this->model->GetJoint("jaw11")-> GetAngle(0);
+    	arrayJointPositions[0] = id11.Degree();
+    		math::Angle id21 = this->model->GetJoint("jaw21")-> GetAngle(0);
+    		arrayJointPositions[1] = id21.Degree();
+				math::Angle id31 = this->model->GetJoint("jaw31")-> GetAngle(0);
+    			arrayJointPositions[2] = id31.Degree();
+    				math::Angle id41 = this->model->GetJoint("jaw41")-> GetAngle(0);
+    				arrayJointPositions[3] = id41.Degree();
+    	math::Angle id12 = this->model->GetJoint("pitch12")-> GetAngle(0);
+    	arrayJointPositions[4] = id12.Degree();
+    		math::Angle id22 = this->model->GetJoint("pitch22")-> GetAngle(0);
+    		arrayJointPositions[5] = id22.Degree();
+				math::Angle id32 = this->model->GetJoint("pitch32")-> GetAngle(0);
+    			arrayJointPositions[6] = id32.Degree();
+    				math::Angle id42 = this->model->GetJoint("pitch42")-> GetAngle(0);
+    				arrayJointPositions[7] = id42.Degree();
+    	math::Angle id13 = this->model->GetJoint("pitch13")-> GetAngle(0);
+    	arrayJointPositions[8] = id13.Degree();
+    		math::Angle id23 = this->model->GetJoint("pitch23")-> GetAngle(0);
+    		arrayJointPositions[9] = id23.Degree();
+				math::Angle id33 = this->model->GetJoint("pitch33")-> GetAngle(0);
+    			arrayJointPositions[10] = id33.Degree();
+    				math::Angle id43 = this->model->GetJoint("pitch43")-> GetAngle(0);
+    				arrayJointPositions[11] = id43.Degree();	
+    }
+    
+    
+    void  printJointPositions()
+    {   				
+    	getJointPositions();
+    	//print current positions to terminal			
+    	std::cout << "Store:" << store << " Home:" << home 
+    				<< " p11:"<< arrayJointPositions[0] << " p21:"<< arrayJointPositions[1] << " p31:"<< arrayJointPositions[2] << " p41:"<< arrayJointPositions[3]
+    					<< " p12:"<< arrayJointPositions[4] << " p22:"<< arrayJointPositions[5] << " p32:"<< arrayJointPositions[6] << " p42:"<< arrayJointPositions[7]
+    						<< " p13:"<< arrayJointPositions[8] << " p23:"<< arrayJointPositions[9] << " p33:"<< arrayJointPositions[10] << " p43:"<< arrayJointPositions[11] << std::endl;
+    }
+    
+    
+    void setJointsPosition()
+	{
+		float r11, r21, r31, r41, 		//jaw joints
+				r12, r22, r32, r42, 	//first pitch joint
+					r13, r23, r33, r43; 	//end pitch joint
+		
+		//convert from degree to radians			
+		r11 = arrayJointRequest[0] * 3.1415 / 180;
+		r21 = arrayJointRequest[1] * 3.1415 / 180;
+		r31 = arrayJointRequest[2] * 3.1415 / 180;
+		r41 = arrayJointRequest[3] * 3.1415 / 180;
+			r12 = arrayJointRequest[4] * 3.1415 / 180;
+			r22 = arrayJointRequest[5] * 3.1415 / 180;
+			r32 = arrayJointRequest[6] * 3.1415 / 180;
+			r42 = arrayJointRequest[7] * 3.1415 / 180;
+				r13 = arrayJointRequest[8] * 3.1415 / 180;
+				r23 = arrayJointRequest[9] * 3.1415 / 180;
+				r33 = arrayJointRequest[10] * 3.1415 / 180;
+				r43 = arrayJointRequest[11] * 3.1415 / 180;
+				
+		//Set controller Target Positions
+		this->model->GetJointController()->SetPositionTarget(this->ID11->GetScopedName(), r11);
+		this->model->GetJointController()->SetPositionTarget(this->ID21->GetScopedName(), r21);
+		this->model->GetJointController()->SetPositionTarget(this->ID31->GetScopedName(), r31);
+		this->model->GetJointController()->SetPositionTarget(this->ID41->GetScopedName(), r41);
+			this->model->GetJointController()->SetPositionTarget(this->ID12->GetScopedName(), r12);
+			this->model->GetJointController()->SetPositionTarget(this->ID22->GetScopedName(), r22);
+			this->model->GetJointController()->SetPositionTarget(this->ID32->GetScopedName(), r32);
+			this->model->GetJointController()->SetPositionTarget(this->ID42->GetScopedName(), r42);
+				this->model->GetJointController()->SetPositionTarget(this->ID13->GetScopedName(), r13);
+				this->model->GetJointController()->SetPositionTarget(this->ID23->GetScopedName(), r23);
+				this->model->GetJointController()->SetPositionTarget(this->ID33->GetScopedName(), r33);
+				this->model->GetJointController()->SetPositionTarget(this->ID43->GetScopedName(), r43);
+	}
+
+	// Returns true if target joint positions reached 
+	bool compareRequestAndPossition(int precision )
+	{
+		printJointPositions();
+		int b = 0;
+		for( int a = 0; a < 12; a = a + 1 ) 
+		{
+      		if( arrayJointRequest[a] < (arrayJointPositions[a] + precision )  &&  arrayJointRequest[a] > (arrayJointPositions[a] - precision )  )  //allows for +-precision degrees of miss alignment
+      		{
+      		}
+      		else
+      		{
+      			b++;
+      		}
+   		}	
+   		if ( b == 0 )
+   		{
+   			std::cout << "*************************** Target Reached ******************************" << std::endl;
+   			return true;	
+   		}
+   		else
+   		{
+   			return false;
+   		}
+	}
+
+	// ---------------------------------  Poses ------------------------------------------------
+	void Store()
+	{
+		if(busy == false)
+			{
+				busy = true;
+				//Store home joint positions
+				arrayJointRequest[0] = 0; 	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 	arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 0; 	arrayJointRequest[5] = 0;	arrayJointRequest[6] = 0; 	arrayJointRequest[7] = 0;
+				arrayJointRequest[8] = 0; 	arrayJointRequest[9] = 0; 	arrayJointRequest[10] = 0; 	arrayJointRequest[11] = 0;
+				setJointsPosition();
+			}
+		if(compareRequestAndPossition(10))
+		{
+			printJointPositions();
+			busy = false; 
+			store = true;
+		}
+		else
+		{
+			printJointPositions();
+		}
+	}//______________ end Store() ___________________
+	
+	
+	bool Home()
+	{
+		if(busy == false )
+			{
+				busy = true;
+				//steps to be taken for home pose
+				step1 = false;  step2 = false;  step3 = false;  
+				step4 = false;  step5 = false;  step6 = false;  
+				step7 = false;  step8 = false;  step9 = false;  
+				step10 = false; step11 = false; step12 = false;
+				step13 = false;	step14 = false; 
+				
+				std::cout << "*************************** Home Pose In Progress ******************************" << std::endl;
+			}
+			
+		//Movements 	
+		if(step1 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;							arrayJointRequest[1] = 0; 						arrayJointRequest[2] = 0; 							arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = arrayJointPositions[4];	arrayJointRequest[5] = arrayJointPositions[5]; 	arrayJointRequest[6] = arrayJointPositions[6]; 		arrayJointRequest[7] = arrayJointPositions[7];
+				arrayJointRequest[8] = arrayJointPositions[8];	arrayJointRequest[9] = arrayJointPositions[9]; 	arrayJointRequest[10] = arrayJointPositions[10]; 	arrayJointRequest[11] = arrayJointPositions[11];
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step1 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step1 = true;
+					}
+			}
+		else if(step2 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;						arrayJointRequest[1] = 0; 						arrayJointRequest[2] = 0; 							arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 2;						arrayJointRequest[5] = arrayJointPositions[5]; 	arrayJointRequest[6] = 2; 							arrayJointRequest[7] = arrayJointPositions[7];
+				arrayJointRequest[8] = arrayJointPositions[8];	arrayJointRequest[9] = arrayJointPositions[9]; 	arrayJointRequest[10] = arrayJointPositions[10]; 	arrayJointRequest[11] = arrayJointPositions[11];
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step2 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step2 = true;
+					}
+			}
+		else if(step3 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 						arrayJointRequest[2] = 0; 							arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 2;	arrayJointRequest[5] = 1; 						arrayJointRequest[6] = 2; 							arrayJointRequest[7] = arrayJointPositions[7];
+				arrayJointRequest[8] = -2;	arrayJointRequest[9] = arrayJointPositions[9]; 	arrayJointRequest[10] = -2; 						arrayJointRequest[11] = arrayJointPositions[11];
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step3 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step3 = true;
+					}
+			}	
+		else if(step4 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 5;	arrayJointRequest[5] = 2;	arrayJointRequest[6] = 1; 		arrayJointRequest[7] = 1;
+				arrayJointRequest[8] = -5;	arrayJointRequest[9] = -1; 	arrayJointRequest[10] = -1; 	arrayJointRequest[11] = arrayJointPositions[11];
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step4 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step4 = true;
+					}
+			}	
+		else if(step5 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 7;	arrayJointRequest[5] = 5; 	arrayJointRequest[6] = 2; 		arrayJointRequest[7] = 2;
+				arrayJointRequest[8] = -7;	arrayJointRequest[9] = -3; 	arrayJointRequest[10] = -2; 	arrayJointRequest[11] = -1;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step5 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step5 = true;
+					}
+			}
+		else if(step6 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 	arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 10;	arrayJointRequest[5] = 5; 	arrayJointRequest[6] = 3; 	arrayJointRequest[7] = 3;
+				arrayJointRequest[8] = -10;	arrayJointRequest[9] = -5; arrayJointRequest[10] = -3; 	arrayJointRequest[11] =-2;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step6 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step6 = true;
+					}
+			}
+		else if(step7 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 	arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 12;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 6; 	arrayJointRequest[7] = 7;
+				arrayJointRequest[8] = -10;	arrayJointRequest[9] = -5; arrayJointRequest[10] = -3; 	arrayJointRequest[11] = -3;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step7 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step7 = true;
+					}
+			}
+		else if(step8 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 12;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 7; 		arrayJointRequest[7] = 8;
+				arrayJointRequest[8] = -12;	arrayJointRequest[9] = -10; arrayJointRequest[10] = -5; 	arrayJointRequest[11] = -4;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step8 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step8 = true;
+					}
+			}
+		else if(step9 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 13;	arrayJointRequest[5] = 13; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = 10;
+				arrayJointRequest[8] = -10;	arrayJointRequest[9] = -10; arrayJointRequest[10] = -5; 	arrayJointRequest[11] = -2;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step9 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step9 = true;
+					}
+			}
+		else if(step10 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 13;	arrayJointRequest[5] = 13; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = 12;
+				arrayJointRequest[8] = -13;	arrayJointRequest[9] = -12; arrayJointRequest[10] = -7; 	arrayJointRequest[11] = -5;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step10 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step10 = true;
+					}
+			}	
+		else if(step11 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 15;	arrayJointRequest[5] = 14; 	arrayJointRequest[6] = 12; 		arrayJointRequest[7] = 13;
+				arrayJointRequest[8] = -15;	arrayJointRequest[9] = -14; arrayJointRequest[10] = -9; 	arrayJointRequest[11] = -10;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step11 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step11 = true;
+					}
+			}
+		else if(step12 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 15;	arrayJointRequest[5] = 15; 	arrayJointRequest[6] = 15; 		arrayJointRequest[7] = 15;
+				arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step12 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step12 = true;
+					}
+			}
+		else if(step13 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 15;	arrayJointRequest[5] = 15; 	arrayJointRequest[6] = 15; 		arrayJointRequest[7] = 15;
+				arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step13 ******************************" << std::endl;
+				if(compareRequestAndPossition(2))
+					{
+						step13 = true;
+					}
+			}
+		else if(step14 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+				arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Home Pose In Progress: Step14 ******************************" << std::endl;
+				if(compareRequestAndPossition(3))
+					{
+						step14 = true;
+					}
+			}
+		else 
+		{
+			printJointPositions();
+			std::cout << "*************************** Home Pose Complete  ******************************" << std::endl;
+			busy = false; 
+			home = true;
+			printJointPositions();
+		}
+	} //_____________________ end Home() ___________________________________________
+	
+	
+	void ModelCCw()
+	{
+		if(busy == false )
+			{
+				busy = true;
+				//steps to be taken for home pose
+				step1 = false;  step2 = false;  step3 = false;  
+				step4 = false;  step5 = false;  step6 = false;  
+				step7 = false;  step8 = false;  step9 = false;  
+				step10 = false; step11 = false; step12 = false;
+				step13 = false;	step14 = false; step15 = false;
+				step16 = false; step17 = false;
+				
+				std::cout << "*************************** Model Counter Clockwise Rotation In Progress ******************************" << std::endl;
+			}
+		//Movements 	
+		if(step1 == false)
+			{
+				//Step Joint Positions
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+				arrayJointRequest[8] = -15;	arrayJointRequest[9] = -10; arrayJointRequest[10] = -20; 	arrayJointRequest[11] = -20;
+				//apply step to controller
+				setJointsPosition();
+				std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 1 ******************************" << std::endl;
+				if(compareRequestAndPossition(3))
+					{
+						step1 = true;
+					}
+			}
+
+
+		else 
+		{
+			printJointPositions();
+			std::cout << "*************************** Model Counter Clockwise Rotation Complete  ******************************" << std::endl;
+			busy = false; 
+			modelCCw = true;
+			printJointPositions();
+		}
+	}// ___________________________________end ModelCCw() ______________________________________________________
+	
+// ----------------------------- End Functions -----------------------------	
+
+};
+  // Register this plugin with the simulator
+  GZ_REGISTER_MODEL_PLUGIN(roboControl)
+}
+
+// --------------------------   END -----------------------------
+
+/*
+---------Store
+arrayJointRequest[0] = 0; 	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 	arrayJointRequest[3] = 0; 
+arrayJointRequest[4] = 0; 	arrayJointRequest[5] = 0;	arrayJointRequest[6] = 0; 	arrayJointRequest[7] = 0;
+arrayJointRequest[8] = 0; 	arrayJointRequest[9] = 0; 	arrayJointRequest[10] = 0; 	arrayJointRequest[11] = 0;
+
+---------Home
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+				arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+
+---------Current Position
+arrayJointRequest[0] = arrayJointPositions[0];	arrayJointRequest[1] = arrayJointPositions[1]; 	arrayJointRequest[2] = arrayJointPositions[2]; 		arrayJointRequest[3] = arrayJointPositions[3]; 
+arrayJointRequest[4] = arrayJointPositions[4];	arrayJointRequest[5] = arrayJointPositions[5]; 	arrayJointRequest[6] = arrayJointPositions[6]; 		arrayJointRequest[7] = arrayJointPositions[7];
+arrayJointRequest[8] = arrayJointPositions[8];	arrayJointRequest[9] = arrayJointPositions[9]; 	arrayJointRequest[10] = arrayJointPositions[10]; 	arrayJointRequest[11] = arrayJointPositions[11];
+
+
+
+
+
+*/
+
+
+

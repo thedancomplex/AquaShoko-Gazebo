@@ -1,0 +1,137 @@
+
+    	
+		//**************************leg1 && leg3***************************
+		if (leg1 == false && leg3 == false && leg2 == false && leg4 == false)
+		{
+			//check if leg is in position
+			if ( p12 == 21 || p12 == 20 || p12 == 19 || p32 == 21 || p32 == 20 || p32 == 19 )
+    			{
+    				pos1 = true;
+    				std::cout << "Home: Leg1 and Leg3 Position One Done" << std::endl;	
+    			}
+    		if (p13 == -29 || p13 == -30|| p13 == -31 || p33 == -29 || p33 == -30|| p33 == -31)
+    			{
+    				pos2 = true;
+    				std::cout << "Home: Leg1 and Leg3 Position Two Done" << std::endl;	
+    			}
+    		if (p12 == -19 || p12 == -20 || p12 == -21 
+    				|| p32 == -19 || p32 == -20 || p32 == -21
+    					|| p12 == -19 || p12 == -20 || p12 == -21 
+    						|| p32 == -19 || p32 == -20 || p32 == -21
+    																	
+    																	)
+    			{
+    				pos3 = true;
+    				std::cout << "Home: Leg1 and Leg3 Position Three Done" << std::endl;	
+    			}
+
+			if (pos1 == false && pos2 == false && pos3 == false)
+			{
+				getJointPositions();
+    			printJointPositions();
+    			setJointsPosition(0, 0, 0, 0, 20, 0, 20, 0, 0, 0, 0, 0);
+    			if ( p12 == 21 || p12 == 20 || p12 == 19 || p32 == 21 || p32 == 20 || p32 == 19  )
+    			{
+    				pos1 = true;
+    			}
+			}
+			if (pos1 == true && pos2 == false && pos3 == false)
+			{
+				getJointPositions();
+    			printJointPositions();
+    			setJointsPosition(0, 0, 0, 0, 20, 0, 0, 0, -30, 0, -30, 0);
+    			if (p13 == -29 || p13 == -30|| p13 == -31 || p33 == -29 || p33 == -30|| p33 == -31)
+    			{
+    				pos2 = true;
+    			}
+			}
+			if (pos2 == true && pos3 == false)
+			{
+				getJointPositions();
+    			printJointPositions();
+    			setJointsPosition(0, 0, 0, 0, -20, 0, -20, 0, -30, 0, -30, 0);
+    			if (p12 == -19 || p12 == -20 || p12 == -21 || p32 == -19 || p32 == -20 || p32 == -21)
+    			{
+    				pos3 = true;
+    			}
+    		if ( pos3 == true)
+			{
+				leg1 = true;
+				leg3 = true;
+				std::cout << "Home: Leg1 and leg3 Done" << std::endl;		
+			}
+		}//************************* end leg1 and leg3 ************************
+		
+		//Reset Position checks
+		if( leg1 == true && leg2 == true)
+		{
+			pos1 = false;
+			pos2 = false;
+			pos3 = false;
+		}
+					
+		//***********************leg2 && leg4**********************************
+		if ( (leg1 == true  && leg3 == true) && (leg2 == false  || leg4 == false) )
+		{
+			//check if leg is in position
+			if ( p22 == 21 || p22 == 20 || p22 == 19 || p42 == 21 || p42 == 20 || p42 == 19 )
+    			{
+    				pos1 = true;
+    			}
+    		if (p23 == -29 || p23 == -30|| p23 == -31 || p43 == -29 || p43 == -30|| p43 == -31)
+    			{
+    				pos2 = true;
+    			}
+    		if (p22 == -19 || p22 == -20 || p22 == -21 || p42 == -19 || p42 == -20 || p42 == -21)
+    			{
+    				pos3 = true;
+    			}
+
+
+			if (pos1 == false && pos2 == false && pos3 == false)
+			{
+				getJointPositions();
+    			printJointPositions();
+    			setJointsPosition(0, 0, 0, 0, -20, 20, -20, 20, -30, 0, -30, 0);
+    			if ( p22 == 21 || p22 == 20 || p22 == 19 || p42 == 21 || p42 == 20 || p42 == 19 )
+    			{
+    				pos1 = true;
+    			}
+			}
+			if (pos1 == true && pos2 == false && pos3 == false)
+			{
+				getJointPositions();
+    			printJointPositions();
+    			setJointsPosition(0, 0, 0, 0, -20, 0, -20, 0, -30, -30, -30, -30);
+    			if (p23 == -29 || p23 == -30|| p23 == -31 || p43 == -29 || p43 == -30|| p43 == -31)
+    			{
+    				pos2 = true;
+    			}
+			}
+			if (pos2 == true && pos3 == false)
+			{
+				getJointPositions();
+    			printJointPositions();
+    			setJointsPosition(0, 0, 0, 0, -20, -20, -20, -20, -30, -30, -30, -30);
+    			if (p22 == -19 || p22 == -20 || p22 == -21 || p42 == -19 || p42 == -20 || p42 == -21)
+    			{
+    				pos3 = true;
+    			}
+			}
+			
+			if ( pos3 == true)
+			{
+				leg2 = true;
+				leg4 = true;	
+			}
+		}//******************** end leg2 and leg4 ********************
+		
+		//return if home sequence finished
+		if (leg1 == true && leg2 == true && leg3 == true && leg4 == true)
+		{
+			return true;	
+		}
+		else
+		{
+			return false;
+		}
