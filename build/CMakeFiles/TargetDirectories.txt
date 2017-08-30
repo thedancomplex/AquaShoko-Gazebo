@@ -1,0 +1,3 @@
+/Users/albertoperez/GazeboAquaShoko/build/CMakeFiles/rebuild_cache.dir
+/Users/albertoperez/GazeboAquaShoko/build/CMakeFiles/edit_cache.dir
+/Users/albertoperez/GazeboAquaShoko/build/CMakeFiles/roboControl.dir
