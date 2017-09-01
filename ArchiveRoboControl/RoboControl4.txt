@@ -1,0 +1,1472 @@
+#include <boost/bind.hpp>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/common/common.hh>
+#include <stdio.h>
+#include <gazebo/common/Time.hh>
+#include <boost/filesystem.hpp>
+#include <ctime>
+
+
+//PID values Jaw
+float ProJaw = 350; //proportional control
+float InteJaw = 0; //integral control
+float DereJaw = 70; //derivative control
+//PID values Pitch #2
+float ProPitch1 = 400; //proportional control
+float IntePitch1 = 0; //integral control
+float DerePitch1 = 120; //derivative control
+//PID values Pitch #2
+float ProPitch2 = 200; //proportional control
+float IntePitch2 = 0; //integral control
+float DerePitch2 = 55; //derivative control
+
+//for use in reading joint position			
+int arrayJointPositions[12] = {}; 	
+//for use to request joint position
+int arrayJointRequest[12] = {};	
+
+
+//status
+bool busy = false;
+//poses  
+bool store = false;
+bool home = false;
+//Model Rotations
+bool modelCCw= false; 
+int countCCw = 0;
+bool modelCw = false;
+int countCw = 0;
+
+bool modelTipCCw= false; 
+int countTipCCw = 0;
+bool modelTipCw = false;
+int countTipCw = 0;
+//Model Walks, number(s) indicate leading leg(s)
+bool modelWalk12 = false;
+bool modelWalk23 = false;
+bool modelWalk34 = false;
+bool modelWalk41 = false;
+bool modelWalk1 = false;
+bool modelWalk2 = false;
+bool modelWalk3 = false;
+bool modelWalk4 = false;
+
+//pose transitions
+bool step1,  step2,  step3,  step4,  step5,  step6,  step7,  step8,  step9,  step10,
+	 step11, step12, step13, step14, step15, step16, step17, step18, step19, step20,
+	 step21, step22, step23, step24, step25, step26, step27, step28, step29, step30, 
+	 step31, step32, step33, step34, step35, step36, step37, step38, step39, step40,
+	 step41, step42, step43, step44, step45, step46, step47, step48, step49, step50 = true;
+
+
+
+namespace gazebo
+{
+  class roboControl : public ModelPlugin
+  {
+  
+    public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
+    {
+		// Store the pointer to the model
+		this->model = _parent;
+		
+		
+		//  -----------------------------  Joint Controller Setup -----------------------------
+		//Store the pointer to controller
+		this->ShokoControl = new physics::JointController(_parent);
+		// Setup a PID controller
+ 		this->pid11 = common::PID(ProJaw, InteJaw, DereJaw);
+ 		this->pid21 = common::PID(ProJaw, InteJaw, DereJaw);
+ 		this->pid31 = common::PID(ProJaw, InteJaw, DereJaw);
+ 		this->pid41 = common::PID(ProJaw, InteJaw, DereJaw);
+ 			this->pid12 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 			this->pid22 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 			this->pid32 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 			this->pid42 = common::PID(ProPitch1, IntePitch1, DerePitch1);
+ 				this->pid13 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				this->pid23 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				this->pid33 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				this->pid43 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 				
+ 		this->ID11 = this->model->GetJoint("jaw11");
+ 		this->ID21 = this->model->GetJoint("jaw21");
+ 		this->ID31 = this->model->GetJoint("jaw31");
+ 		this->ID41 = this->model->GetJoint("jaw41");
+ 			this->ID12 = this->model->GetJoint("pitch12");
+ 			this->ID22 = this->model->GetJoint("pitch22");
+ 			this->ID32 = this->model->GetJoint("pitch32");
+ 			this->ID42 = this->model->GetJoint("pitch42");
+ 				this->ID13 = this->model->GetJoint("pitch13");
+ 				this->ID23 = this->model->GetJoint("pitch23");
+ 				this->ID33 = this->model->GetJoint("pitch33");
+ 				this->ID43 = this->model->GetJoint("pitch43");
+
+ 		this->model->GetJointController()->SetPositionPID(this->ID11->GetScopedName(), this->pid11);
+  		this->model->GetJointController()->SetPositionPID(this->ID21->GetScopedName(), this->pid21);
+		this->model->GetJointController()->SetPositionPID(this->ID31->GetScopedName(), this->pid31);
+		this->model->GetJointController()->SetPositionPID(this->ID41->GetScopedName(), this->pid41);
+			this->model->GetJointController()->SetPositionPID(this->ID12->GetScopedName(), this->pid12);
+			this->model->GetJointController()->SetPositionPID(this->ID22->GetScopedName(), this->pid22);
+			this->model->GetJointController()->SetPositionPID(this->ID32->GetScopedName(), this->pid32);
+			this->model->GetJointController()->SetPositionPID(this->ID42->GetScopedName(), this->pid42);
+				this->model->GetJointController()->SetPositionPID(this->ID13->GetScopedName(), this->pid13);
+				this->model->GetJointController()->SetPositionPID(this->ID23->GetScopedName(), this->pid23);
+				this->model->GetJointController()->SetPositionPID(this->ID33->GetScopedName(), this->pid33);
+				this->model->GetJointController()->SetPositionPID(this->ID43->GetScopedName(), this->pid43);
+			//  -----------------------------  Joint Controller Setup End  -----------------------------	
+		
+		
+		
+		
+		// Listen to the update event. This event is broadcast every
+		// simulation iteration.
+    	this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&roboControl::OnUpdate, this, _1));
+    	std::cout << "*************************** roboControl ******************************" << std::endl;	
+    	std::cout << "--------- Controller PID Jaw:" <<" P:" << ProJaw <<" I:" << InteJaw << " D:"<< DereJaw <<std::endl;
+    	std::cout << "------ Controller PID Pitch1:" <<" P:" << ProPitch1 <<" I:" << IntePitch1 << " D:"<< DerePitch1 <<std::endl;
+    	std::cout << "------ Controller PID Pitch2:" <<" P:" << ProPitch2 <<" I:" << IntePitch2 << " D:"<< DerePitch2 <<std::endl;
+	
+    }
+     
+  
+     
+// _----__--_-_-__-_-- Called by the world update start event  -----___-----__------__----___----loop that makes the stuff happen _______----______------_________------_____---
+	public: void OnUpdate(const common::UpdateInfo & /*_info*/)
+	{	
+
+		if(store == false)
+			{
+				Store();
+			}
+		if(store == true && home == false)
+			{
+				Home();
+			}	
+		if(home == true && modelCCw == false )
+			{
+				ModelCCw(45, 1);
+			}	
+			
+		/*	
+		if(modelCw == false && modelCCw == true )
+			{
+				ModelCw(45, 4);
+			}
+		*/	
+		/*  PID Tune Test
+			//Step Joint Positions
+			arrayJointRequest[0] = 25;	arrayJointRequest[1] = 25; 	arrayJointRequest[2] = -25; 	arrayJointRequest[3] = -25; 
+			arrayJointRequest[4] = -20;	arrayJointRequest[5] = -20; 	arrayJointRequest[6] = -20; 	arrayJointRequest[7] = -20;
+			arrayJointRequest[8] = -30;	arrayJointRequest[9] = -30; arrayJointRequest[10] = -30; 	arrayJointRequest[11] = -30;
+			//apply step to controller
+			setJointsPosition(3);	
+			printJointPositions();	
+		*/								
+	}
+	
+    //  ----------------------------- Pointer to the model -----------------------------
+    private: physics::ModelPtr model;
+    // Pointer to the update event connection
+    public: physics::JointPtr ID11;
+    public: physics::JointPtr ID21;
+    public: physics::JointPtr ID31;
+    public: physics::JointPtr ID41;
+    	public: physics::JointPtr ID12;
+    	public: physics::JointPtr ID22;
+    	public: physics::JointPtr ID32;
+    	public: physics::JointPtr ID42;
+    		public: physics::JointPtr ID13;
+    		public: physics::JointPtr ID23;
+    		public: physics::JointPtr ID33;
+    		public: physics::JointPtr ID43;
+	//important Stuff
+    private: event::ConnectionPtr updateConnection;
+    //Pointer to controller
+    private: physics::JointController * ShokoControl;
+	/// \brief A PID controller for the joint.
+	private: common::PID pid11,pid21,pid31,pid41,
+							pid12,pid22,pid32,pid42,
+								pid13,pid23,pid33,pid43;
+
+
+// ----------------------------- Start Functions -----------------------------
+    void getJointPositions()
+    {
+    	math::Angle id11 = this->model->GetJoint("jaw11")-> GetAngle(0);
+    	arrayJointPositions[0] = id11.Degree();
+    		math::Angle id21 = this->model->GetJoint("jaw21")-> GetAngle(0);
+    		arrayJointPositions[1] = id21.Degree();
+				math::Angle id31 = this->model->GetJoint("jaw31")-> GetAngle(0);
+    			arrayJointPositions[2] = id31.Degree();
+    				math::Angle id41 = this->model->GetJoint("jaw41")-> GetAngle(0);
+    				arrayJointPositions[3] = id41.Degree();
+    	math::Angle id12 = this->model->GetJoint("pitch12")-> GetAngle(0);
+    	arrayJointPositions[4] = id12.Degree();
+    		math::Angle id22 = this->model->GetJoint("pitch22")-> GetAngle(0);
+    		arrayJointPositions[5] = id22.Degree();
+				math::Angle id32 = this->model->GetJoint("pitch32")-> GetAngle(0);
+    			arrayJointPositions[6] = id32.Degree();
+    				math::Angle id42 = this->model->GetJoint("pitch42")-> GetAngle(0);
+    				arrayJointPositions[7] = id42.Degree();
+    	math::Angle id13 = this->model->GetJoint("pitch13")-> GetAngle(0);
+    	arrayJointPositions[8] = id13.Degree();
+    		math::Angle id23 = this->model->GetJoint("pitch23")-> GetAngle(0);
+    		arrayJointPositions[9] = id23.Degree();
+				math::Angle id33 = this->model->GetJoint("pitch33")-> GetAngle(0);
+    			arrayJointPositions[10] = id33.Degree();
+    				math::Angle id43 = this->model->GetJoint("pitch43")-> GetAngle(0);
+    				arrayJointPositions[11] = id43.Degree();	
+    }
+    
+    
+    void  printJointPositions()
+    {   				
+    	getJointPositions();
+    	//print current positions to terminal			
+    	std::cout << "Store:" << store << " Home:" << home 
+    				<< " p11:"<< arrayJointPositions[0] << " p21:"<< arrayJointPositions[1] << " p31:"<< arrayJointPositions[2] << " p41:"<< arrayJointPositions[3]
+    					<< " p12:"<< arrayJointPositions[4] << " p22:"<< arrayJointPositions[5] << " p32:"<< arrayJointPositions[6] << " p42:"<< arrayJointPositions[7]
+    						<< " p13:"<< arrayJointPositions[8] << " p23:"<< arrayJointPositions[9] << " p33:"<< arrayJointPositions[10] << " p43:"<< arrayJointPositions[11] << std::endl;
+    }
+    
+    
+    void setJointsPosition(float rpm)     //int rpm sets max joint speed
+	{
+		float r11, r21, r31, r41, 		//jaw joints
+				r12, r22, r32, r42, 	//first pitch joint
+					r13, r23, r33, r43; 	//end pitch joint
+		
+		//convert from degree to radians			
+		r11 = arrayJointRequest[0] * 3.1415 / 180;
+		r21 = arrayJointRequest[1] * 3.1415 / 180;
+		r31 = arrayJointRequest[2] * 3.1415 / 180;
+		r41 = arrayJointRequest[3] * 3.1415 / 180;
+			r12 = arrayJointRequest[4] * 3.1415 / 180;
+			r22 = arrayJointRequest[5] * 3.1415 / 180;
+			r32 = arrayJointRequest[6] * 3.1415 / 180;
+			r42 = arrayJointRequest[7] * 3.1415 / 180;
+				r13 = arrayJointRequest[8] * 3.1415 / 180;
+				r23 = arrayJointRequest[9] * 3.1415 / 180;
+				r33 = arrayJointRequest[10] * 3.1415 / 180;
+				r43 = arrayJointRequest[11] * 3.1415 / 180;
+
+		//Set controller Target Positions
+		this->model->GetJointController()->SetPositionTarget(this->ID11->GetScopedName(), r11);
+		this->model->GetJointController()->SetPositionTarget(this->ID21->GetScopedName(), r21);
+		this->model->GetJointController()->SetPositionTarget(this->ID31->GetScopedName(), r31);
+		this->model->GetJointController()->SetPositionTarget(this->ID41->GetScopedName(), r41);
+			this->model->GetJointController()->SetPositionTarget(this->ID12->GetScopedName(), r12);
+			this->model->GetJointController()->SetPositionTarget(this->ID22->GetScopedName(), r22);
+			this->model->GetJointController()->SetPositionTarget(this->ID32->GetScopedName(), r32);
+			this->model->GetJointController()->SetPositionTarget(this->ID42->GetScopedName(), r42);
+				this->model->GetJointController()->SetPositionTarget(this->ID13->GetScopedName(), r13);
+				this->model->GetJointController()->SetPositionTarget(this->ID23->GetScopedName(), r23);
+				this->model->GetJointController()->SetPositionTarget(this->ID33->GetScopedName(), r33);
+				this->model->GetJointController()->SetPositionTarget(this->ID43->GetScopedName(), r43);
+		
+		
+		float rps;
+		//convert rpm to 
+		rps = rpm * 0.1047;
+		//Set joint max velocity
+		this->model->GetJoint("jaw11")->SetVelocityLimit(1, rps);
+		this->model->GetJoint("jaw21")->SetVelocityLimit(1, rps);
+		this->model->GetJoint("jaw31")->SetVelocityLimit(1, rps);
+		this->model->GetJoint("jaw41")->SetVelocityLimit(1, rps);
+			this->model->GetJoint("pitch12")->SetVelocityLimit(1, rps);
+			this->model->GetJoint("pitch22")->SetVelocityLimit(1, rps);
+			this->model->GetJoint("pitch32")->SetVelocityLimit(1, rps);
+			this->model->GetJoint("pitch42")->SetVelocityLimit(1, rps);
+				this->model->GetJoint("pitch13")->SetVelocityLimit(1, rps);
+				this->model->GetJoint("pitch23")->SetVelocityLimit(1, rps);
+				this->model->GetJoint("pitch33")->SetVelocityLimit(1, rps);
+				this->model->GetJoint("pitch43")->SetVelocityLimit(1, rps);
+
+	}
+	
+
+
+
+	// Returns true if target joint positions reached 
+	bool compareRequestAndPossition(int precision )
+	{
+		printJointPositions();
+		int b = 0;
+		for( int a = 0; a < 12; a = a + 1 ) 
+		{
+      		if( arrayJointRequest[a] < (arrayJointPositions[a] + precision )  &&  arrayJointRequest[a] > (arrayJointPositions[a] - precision )  )  //allows for +-precision degrees of miss alignment
+      		{
+      		}
+      		else
+      		{
+      			b++;
+      		}
+   		}	
+   		if ( b == 0 )
+   		{
+   			std::cout << "*************************** Target Reached ******************************" << std::endl;
+   			return true;	
+   		}
+   		else
+   		{
+   			return false;
+   		}
+	}
+
+	// ---------------------------------  Poses ------------------------------------------------
+	void Store()
+	{
+		if(busy == false)
+			{
+				busy = true;
+				//Store home joint positions
+				arrayJointRequest[0] = 0; 	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 	arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 0; 	arrayJointRequest[5] = 0;	arrayJointRequest[6] = 0; 	arrayJointRequest[7] = 0;
+				arrayJointRequest[8] = 0; 	arrayJointRequest[9] = 0; 	arrayJointRequest[10] = 0; 	arrayJointRequest[11] = 0;
+				setJointsPosition(3);
+			}
+		if(compareRequestAndPossition(10))
+		{
+			printJointPositions();
+			busy = false; 
+			store = true;
+		}
+		else
+		{
+			printJointPositions();
+		}
+	}//______________ end Store() ___________________
+	
+	
+	void Home()
+	{
+		if(busy == false )
+			{
+			busy = true;
+			//steps to be taken for home pose
+			step1 = false;  step2 = false;  step3 = false;  
+			std::cout << "*************************** Home Pose In Progress ******************************" << std::endl;
+			}
+			
+		//Movements 
+		if(step1 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 15;	arrayJointRequest[5] = 15; 	arrayJointRequest[6] = 15; 	arrayJointRequest[7] = 15;
+			arrayJointRequest[8] = 0;	arrayJointRequest[9] = 0; arrayJointRequest[10] = 0; 	arrayJointRequest[11] = 0;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Home Pose In Progress: Step1 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step1 = true;
+				}
+			}
+		else if(step2 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 10;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = 10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Home Pose In Progress: Step2 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step2 = true;
+				}
+			}
+		else if(step3 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Home Pose In Progress: Step3 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step3 = true;
+				}
+			}			
+		else 
+			{
+			std::cout << "*************************** Home Pose Complete  ******************************" << std::endl;
+			busy = false; 
+			home = true;
+			printJointPositions();
+			}
+	} //_____________________ end Home() ___________________________________________
+	
+	
+	void ModelTipCCw(int degreeDesired, int quantity)
+	{
+		int degDe = degreeDesired + 4;
+		
+		if(busy == false)
+			{
+			busy = true;
+			//steps to be taken for home pose
+			step1 = false;  step2 = false;  step3 = false; step4 = false;  step5 = false;  step6 = false; step7 = false;  step8 = false;  step9 = false; step10 = false; 
+			step11 = false; step12 = false; step13 = false;	step14 = false; step15 = false; step16 = false; step17 = false; step18 = false;  step19 = false; step20 = false; 
+			step21 = false; step22 = false; step23 = false;	step24 = false; step25 = false; step26 = false; step27 = false; step28 = false;  step29 = false; step30 = false; 	
+			step31 = false;
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress ******************************" << std::endl;
+			}
+		//Movements 	
+		if(step1 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 1 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step1 = true;
+				}
+			}
+		else if(step2 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 2 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step2 = true;
+				}
+			}
+		else if(step3 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 10; arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 3 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step3 = true;
+				}
+			}
+		else if(step4 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -20;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 4 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step4 = true;
+				}
+			}
+		else if(step5 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = 0;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 5 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step5 = true;
+				}
+			}
+		else if(step6 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 10; 		arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 6 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step6 = true;
+				}
+			}
+		else if(step7 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 10; 		arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 7 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step7 = true;
+				}
+			}
+		else if(step8 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 10; 		arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 8 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step8 = true;
+				}
+			}
+		else if(step9 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = -0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 9 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step9 = true;
+				}
+			}
+		else if(step10 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 20; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 10 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step10 = true;
+				}
+			}
+		else if(step11 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -10;	arrayJointRequest[5] = 20; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 11 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step11 = true;
+				}
+			}
+		else if(step12 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -10;	arrayJointRequest[5] = 20; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = -20;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 12 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step12 = true;
+				}
+			}
+		else if(step13 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -10;	arrayJointRequest[5] = 20; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = 0;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 13 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step13 = true;
+				}
+			}
+		else if(step14 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = -10;	arrayJointRequest[5] = 20; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 14 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step14 = true;
+				}
+			}
+		else if(step15 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = -10;		arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 15 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step15 = true;
+				}
+			}
+		else if(step16 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 16 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step16 = true;
+				}
+			}
+		else if(step17 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 20;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 17 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step17 = true;
+				}
+			}
+		else if(step18 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 20;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 18 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step18 = true;
+				}
+			}
+		else if(step19 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 20;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = -20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 19 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step19 = true;
+				}
+			}
+		else if(step20 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 20;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = 0; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 20 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step20 = true;
+				}
+			}
+		else if(step21 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 20;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 21 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step21 = true;
+				}
+			}
+		else if(step22 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 22 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step22 = true;
+				}
+			}
+		else if(step23 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 23 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step23 = true;
+				}
+			}
+		else if(step24 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 24 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step24 = true;
+				}
+			}
+		else if(step25 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 10;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = -10; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 25 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step25 = true;
+				}
+			}
+		else if(step26 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 10;	arrayJointRequest[5] = -20; arrayJointRequest[6] = -10; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 26 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step26 = true;
+				}
+			}
+		else if(step27 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  0; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 10;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = -10; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = 0; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 27 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step27 = true;
+				}
+			}
+		else if(step28 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 10;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = -10; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 28 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step28 = true;
+				}
+			}
+		else if(step29 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe;
+			arrayJointRequest[4] = 10;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = -10; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 29 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step29 = true;
+				}
+			}
+		else if(step30 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = -0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 30 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step30 = true;
+				}
+			}
+		else if(step31 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = -0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 31 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step31 = true;
+				}
+			}
+		else 
+			{
+			
+			std::cout << "*************************** Model Counter Clockwise Rotation Complete  ******************************" << std::endl;
+			busy = false; 
+			printJointPositions();
+			countTipCCw ++;
+			if ( countCCw > quantity)
+				{
+				modelTipCCw = true;
+				countTipCCw = 0;
+				}
+			
+			}
+	}// ___________________________________end ModelTipCCw() ______________________________________________________
+	
+	
+	
+	void ModelTipCw(int degreeDesired, int quantity )
+	{
+		int degDe = -degreeDesired - 4;
+		
+		if(busy == false)
+			{
+			busy = true;
+			//steps to be taken for home pose
+			step1 = false;  step2 = false;  step3 = false; step4 = false;  step5 = false;  step6 = false; step7 = false;  step8 = false;  step9 = false; step10 = false; 
+			step11 = false; step12 = false; step13 = false;	step14 = false; step15 = false; step16 = false; step17 = false; step18 = false;  step19 = false; step20 = false; 
+			step21 = false; step22 = false; step23 = false;	step24 = false; step25 = false; step26 = false; step27 = false; step28 = false;  step29 = false; step30 = false; 	
+			step31 = false;
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress ******************************" << std::endl;
+			}
+		//Movements 	
+		if(step1 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 1 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step1 = true;
+				}
+			}
+		else if(step2 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 2 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step2 = true;
+				}
+			}
+		else if(step3 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 3 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step3 = true;
+				}
+			}
+		else if(step4 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -20;	arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 4 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step4 = true;
+				}
+			}
+		else if(step5 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] =  10; arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = 0;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 5 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step5 = true;
+				}
+			}
+		else if(step6 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 6 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step6 = true;
+				}
+			}
+		else if(step7 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 20; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model  Clockwise Rotation In Progress: Step 7 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step7 = true;
+				}
+			}
+		else if(step8 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = 10; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 8 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step8 = true;
+				}
+			}
+		else if(step9 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = -0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 9 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step9 = true;
+				}
+			}
+		else if(step10 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -0;		arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 10 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step10 = true;
+				}
+			}
+		else if(step11 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] =  -10;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 11 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step11 = true;
+				}
+			}
+		else if(step12 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -10;		arrayJointRequest[5] = -20; arrayJointRequest[6] = 10; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 12 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step12 = true;
+				}
+			}
+		else if(step13 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -10;		arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 10; 		arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -0; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 13 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step13 = true;
+				}
+			}
+		else if(step14 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  degDe; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -10;		arrayJointRequest[5] = 0; 		arrayJointRequest[6] = 10;	 	arrayJointRequest[7] = 20;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 14 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step14 = true;
+				}
+			}
+		else if(step15 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  degDe; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = -10;		arrayJointRequest[5] = 0; 		arrayJointRequest[6] = 10; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 15 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step15 = true;
+				}
+			}
+		else if(step16 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = 0; 		arrayJointRequest[6] = 0; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 16 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step16 = true;
+				}
+			}	
+		else if(step17 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 20;		arrayJointRequest[5] = -0; 		arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 17 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step17 = true;
+				}
+			}		
+		else if(step18 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 20;		arrayJointRequest[5] = -10; 		arrayJointRequest[6] = -0; 	arrayJointRequest[7] = 10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 18 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step18 = true;
+				}
+			}	
+		else if(step19 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 20;		arrayJointRequest[5] = -10; 	arrayJointRequest[6] = -20; 	arrayJointRequest[7] = 10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 19 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step19 = true;
+				}
+			}
+		else if(step20 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 20;		arrayJointRequest[5] = -10; 	arrayJointRequest[6] = -0; 		arrayJointRequest[7] = 10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -0; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 20 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step20 = true;
+				}
+			}
+		else if(step21 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 20;		arrayJointRequest[5] = -10; 	arrayJointRequest[6] = -0; 		arrayJointRequest[7] = 10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 21 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step21 = true;
+				}
+			}
+		else if(step22 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = -10; 	arrayJointRequest[6] = -0; 		arrayJointRequest[7] = 10;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 22 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step22 = true;
+				}
+			}
+		else if(step23 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = -0; 		arrayJointRequest[6] = -0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 23 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step23 = true;
+				}
+			}
+		else if(step24 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = 20; 		arrayJointRequest[6] = -0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 24 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step24 = true;
+				}
+			}
+		else if(step25 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 10;		arrayJointRequest[5] = 20; 		arrayJointRequest[6] = -10; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 25 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step25 = true;
+				}
+			}	
+		else if(step26 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 10;		arrayJointRequest[5] = 20; 		arrayJointRequest[6] = -10; 		arrayJointRequest[7] = -20;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 26 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step26 = true;
+				}
+			}	
+		else if(step27 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 10;		arrayJointRequest[5] = 20; 		arrayJointRequest[6] = -10; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -0;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 27 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step27 = true;
+				}
+			}
+		else if(step28 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 10;		arrayJointRequest[5] = 20; 		arrayJointRequest[6] = -10; 	arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 28 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step28 = true;
+				}
+			}	
+		else if(step29 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 10;		arrayJointRequest[5] = 0; 		arrayJointRequest[6] = -10; 	arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 29 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step29 = true;
+				}
+			}	
+		else if(step30 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] = degDe; 	arrayJointRequest[2] =  degDe; 	arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = 0; 		arrayJointRequest[6] = -0; 	arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 30 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step30 = true;
+				}
+			}
+		else if(step31 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;		arrayJointRequest[1] = 0; 		arrayJointRequest[2] =  0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;		arrayJointRequest[5] = 0; 		arrayJointRequest[6] = -0; 		arrayJointRequest[7] = -0;
+			arrayJointRequest[8] = -15;		arrayJointRequest[9] = -15; 	arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Clockwise Rotation In Progress: Step 31 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step31 = true;
+				}
+			}
+		else
+			{
+			
+			std::cout << "*************************** Model Clockwise Rotation Complete  ******************************" << std::endl;
+			busy = false; 
+			printJointPositions();
+			countTipCw ++;
+			if ( countTipCw > quantity )
+				{
+				modelTipCw = true;
+				countTipCw = 0;
+				}		
+			}
+	}// ___________________________________end ModelTipCw() ______________________________________________________
+	
+	
+	void ModelCCw(int degreeDesired, int quantity)
+	{
+		int degDe = -degreeDesired + 0;
+		
+		if(busy == false)
+			{
+			busy = true;
+			//steps to be taken for home pose
+			step1 = false;  step2 = false;  step3 = false;  step4 = false;  step5 = false;  step6 = false; step7 = false;  step8 = false;  step9 = false; step10 = false; 
+			step11 = false; step12 = false; step13 = false;	step14 = false; step15 = false; step16 = false; step17 = false; step18 = false;  step19 = false; step20 = false; 
+			step21 = false; step22 = false; step23 = false;	step24 = false; step25 = false; step26 = false; step27 = false; step28 = false;  step29 = false; step30 = false; 	
+			step31 = false;
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress ******************************" << std::endl;
+			}
+		//Movements 	
+		if(step1 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+			arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+			arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 1 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step1 = true;
+				}
+			}
+		else if(step2 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  degDe; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = -5;		arrayJointRequest[5] = -10; 		arrayJointRequest[6] = -5; 			arrayJointRequest[7] = -5;
+			arrayJointRequest[8] = -20;		arrayJointRequest[9] = -20; 	arrayJointRequest[10] = -20; 		arrayJointRequest[11] = -20;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 2 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step2 = true;
+				}
+			}
+		else if(step3 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = degDe;	arrayJointRequest[1] =  degDe; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = -5;		arrayJointRequest[5] = -10; 		arrayJointRequest[6] = -5; 			arrayJointRequest[7] = -5;
+			arrayJointRequest[8] = -35;		arrayJointRequest[9] = -20; 	arrayJointRequest[10] = -20; 		arrayJointRequest[11] = -20;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 3 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step3 = true;
+				}
+			}
+		else if(step4 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] =  degDe; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = -5;		arrayJointRequest[5] = -10; 		arrayJointRequest[6] = -5; 			arrayJointRequest[7] = -5;
+			arrayJointRequest[8] = -35;		arrayJointRequest[9] = -20; 	arrayJointRequest[10] = -20; 		arrayJointRequest[11] = -20;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 4 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step4 = true;
+				}
+			}
+		else if(step5 == false)
+			{
+			//Step Joint Positions
+			arrayJointRequest[0] = 0;	arrayJointRequest[1] =  degDe; 	arrayJointRequest[2] = degDe; 		arrayJointRequest[3] = degDe; 
+			arrayJointRequest[4] = -5;		arrayJointRequest[5] = -10; 		arrayJointRequest[6] = -5; 			arrayJointRequest[7] = -5;
+			arrayJointRequest[8] = -20;		arrayJointRequest[9] = -20; 	arrayJointRequest[10] = -20; 		arrayJointRequest[11] = -20;
+			//apply step to controller
+			setJointsPosition(0.5);
+			std::cout << "*************************** Model Counter Clockwise Rotation In Progress: Step 5 ******************************" << std::endl;
+			if(compareRequestAndPossition(3))
+				{
+				step5 = true;
+				}
+			}
+
+		
+		else
+			{
+			
+			std::cout << "*************************** Model Counter Clockwise Rotation Complete  ******************************" << std::endl;
+			busy = false; 
+			printJointPositions();
+			countCCw ++;
+			if ( countCCw > quantity )
+				{
+				modelCCw = true;
+				countCCw = 0;
+				}		
+			}
+	}// _________________________ end ModelCCw()__________________________
+	
+	
+	
+	
+	
+// ----------------------------- End Functions -----------------------------	
+
+};
+  // Register this plugin with the simulator
+  GZ_REGISTER_MODEL_PLUGIN(roboControl)
+}
+
+// --------------------------   END -----------------------------
+
+/*
+---------Store
+arrayJointRequest[0] = 0; 	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 	arrayJointRequest[3] = 0; 
+arrayJointRequest[4] = 0; 	arrayJointRequest[5] = 0;	arrayJointRequest[6] = 0; 	arrayJointRequest[7] = 0;
+arrayJointRequest[8] = 0; 	arrayJointRequest[9] = 0; 	arrayJointRequest[10] = 0; 	arrayJointRequest[11] = 0;
+
+---------Home
+				arrayJointRequest[0] = 0;	arrayJointRequest[1] = 0; 	arrayJointRequest[2] = 0; 		arrayJointRequest[3] = 0; 
+				arrayJointRequest[4] = 0;	arrayJointRequest[5] = 0; 	arrayJointRequest[6] = 0; 		arrayJointRequest[7] = 0;
+				arrayJointRequest[8] = -15;	arrayJointRequest[9] = -15; arrayJointRequest[10] = -15; 	arrayJointRequest[11] = -15;
+
+---------Current Position
+arrayJointRequest[0] = arrayJointPositions[0];	arrayJointRequest[1] = arrayJointPositions[1]; 	arrayJointRequest[2] = arrayJointPositions[2]; 		arrayJointRequest[3] = arrayJointPositions[3]; 
+arrayJointRequest[4] = arrayJointPositions[4];	arrayJointRequest[5] = arrayJointPositions[5]; 	arrayJointRequest[6] = arrayJointPositions[6]; 		arrayJointRequest[7] = arrayJointPositions[7];
+arrayJointRequest[8] = arrayJointPositions[8];	arrayJointRequest[9] = arrayJointPositions[9]; 	arrayJointRequest[10] = arrayJointPositions[10]; 	arrayJointRequest[11] = arrayJointPositions[11];
+
+
+
+
+
+*/

@@ -22,7 +22,7 @@
         <pose frame=''>0 0 -0.064 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/BaseLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/BaseLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -121,7 +121,7 @@
         <pose frame=''>0 0 -0.0535 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/HornToHornLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/HornToHornLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -220,7 +220,7 @@
         <pose frame=''>0 0 -0.0535 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/HornToHornLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/HornToHornLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -418,7 +418,7 @@
         <pose frame=''>0 0 -0.0535 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/HornToHornLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/HornToHornLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -517,7 +517,7 @@
         <pose frame=''>0 0 -0.243 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/endLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/endLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -617,7 +617,7 @@
         <pose frame=''>0 0 -0.243 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/endLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/endLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -717,7 +717,7 @@
         <pose frame=''>0 0 -0.243 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/endLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/endLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -817,7 +817,7 @@
         <pose frame=''>0 0 -0.243 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/endLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/endLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -917,7 +917,7 @@
         <pose frame=''>0 0 -0.17 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/middleLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/middleLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -1016,7 +1016,7 @@
         <pose frame=''>0 0 -0.17 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/middleLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/middleLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -1115,7 +1115,7 @@
         <pose frame=''>0 0 -0.17 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/middleLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/middleLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -1214,7 +1214,7 @@
         <pose frame=''>0 0 -0.17 0 -0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://ComplezAquaShoko/meshes/middleLegLink.dae</uri>
+            <uri>model://ComplexAquaShoko/meshes/middleLegLink.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
