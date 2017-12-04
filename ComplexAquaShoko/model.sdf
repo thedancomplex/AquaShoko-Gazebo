@@ -1689,6 +1689,6 @@
     </joint>
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
-    <plugin name='roboControl' filename='libroboControl.so'/>
+    <plugin name='roboControl' filename='/home/hubo/project/AquaShoko-Gazebo/build/libroboControl.so'/>
   </model>
 </sdf>

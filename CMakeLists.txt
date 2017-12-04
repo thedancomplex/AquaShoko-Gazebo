@@ -5,5 +5,5 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 
-add_library(roboControl SHARED roboControl.cc)
-target_link_libraries(roboControl ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
+add_library(roboControl SHARED roboControl.cc )
+target_link_libraries(roboControl ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ach)

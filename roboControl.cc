@@ -6,7 +6,7 @@
 #include <gazebo/common/Time.hh>
 #include <boost/filesystem.hpp>
 #include <ctime>
-
+#include "aquashoko.h"
 
 //PID values Jaw
 float ProJaw = 350; //proportional control
@@ -57,6 +57,11 @@ namespace gazebo
   
     public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
     {
+
+		/* Setup Aquashoko-Ach interface */
+		std::cout << "aquashoko_init() status: " <<  aquashoko_init() << std::endl;
+
+
 		// Store the pointer to the model
 		this->model = _parent;
 		
@@ -122,7 +127,10 @@ namespace gazebo
      
 // _----__--_-_-__-_-- Called by the world update start event  -----___-----__------__----___----loop that makes the stuff happen _______----______------_________------_____---
 	public: void OnUpdate(const common::UpdateInfo & /*_info*/)
-	{	
+	{
+		achControl();
+
+/*	
 
 		if(store == false)
 			{
@@ -136,6 +144,7 @@ namespace gazebo
 			{
 				ModelWalkies(6);
 			}				
+*/
 	}
 	
     //  ----------------------------- Pointer to the model -----------------------------
@@ -164,6 +173,31 @@ namespace gazebo
 
 
 // ----------------------------- Start Functions -----------------------------
+
+
+    void achControl()
+    {
+	/* get update */
+	//aquashoko_pull();
+
+	/* set ref to gazebo */
+	int ii = 0;
+	for(int i = 0; i < AQUASHOKO_LEG_NUM; i++){
+		for(int j = 0; i < AQUASHOKO_LEG_JOINT_NUM; j++){
+			arrayJointRequest[ii] = aquashoko_get(i,j);
+			ii++;
+		}
+	}
+ 
+         setJointsPosition(0.5);
+
+
+
+    }
+
+
+
+
     void getJointPositions()
     {
     	math::Angle id11 = this->model->GetJoint("jaw11")-> GetAngle(0);
