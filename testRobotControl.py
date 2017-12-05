@@ -3,6 +3,9 @@ import rospy
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
 def talker():
+
+    val = 5
+
     pub = rospy.Publisher('aquashoko_chatter', JointState, queue_size=10)
     rospy.init_node('aquashoko_talker')
     rate = rospy.Rate(10) # 10hz
@@ -10,7 +13,7 @@ def talker():
     hello_str.header = Header()
     hello_str.header.stamp = rospy.Time.now()
     hello_str.name = ['joint00', 'joint01', 'joint02', 'joint10', 'joint11', 'joint12', 'joint20', 'joint21', 'joint22', 'joint30', 'joint31','joint32']
-    hello_str.position = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    hello_str.position = [val, val, val, val, val, val, val, val, val, val, val, val]
     hello_str.velocity = []
     hello_str.effort = []
     pub.publish(hello_str)
