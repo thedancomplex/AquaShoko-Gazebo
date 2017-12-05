@@ -39,21 +39,23 @@
 import rospy
 import aquashoko
 from std_msgs.msg import String
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Header
 
 def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.data)
-    aquashoko.aquashoko_set(0,0,30)
-    aquashoko.aquashoko_set(1,0,30)
-    aquashoko.aquashoko_set(2,0,30)
-    aquashoko.aquashoko_set(3,0,30)
-    aquashoko.aquashoko_set(0,1,30)
-    aquashoko.aquashoko_set(1,1,30)
-    aquashoko.aquashoko_set(2,1,30)
-    aquashoko.aquashoko_set(3,1,30)
-    aquashoko.aquashoko_set(0,2,30)
-    aquashoko.aquashoko_set(1,2,30)
-    aquashoko.aquashoko_set(2,2,30)
-    aquashoko.aquashoko_set(3,2,30)
+#    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.name)
+    aquashoko.aquashoko_set(0,0,data.position[0])
+    aquashoko.aquashoko_set(1,0,data.position[1])
+    aquashoko.aquashoko_set(2,0,data.position[2])
+    aquashoko.aquashoko_set(3,0,data.position[3])
+    aquashoko.aquashoko_set(0,1,data.position[4])
+    aquashoko.aquashoko_set(1,1,data.position[5])
+    aquashoko.aquashoko_set(2,1,data.position[6])
+    aquashoko.aquashoko_set(3,1,data.position[7])
+    aquashoko.aquashoko_set(0,2,data.position[8])
+    aquashoko.aquashoko_set(1,2,data.position[9])
+    aquashoko.aquashoko_set(2,2,data.position[10])
+    aquashoko.aquashoko_set(3,2,data.position[11])
     aquashoko.aquashoko_put()
 
 def listener():
@@ -64,9 +66,9 @@ def listener():
     # anonymous=True flag means that rospy will choose a unique
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
+    rospy.init_node('aquashoko_listener', anonymous=False)
 
-    rospy.Subscriber('chatter', String, callback)
+    rospy.Subscriber('aquashoko_chatter', JointState, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
