@@ -15,10 +15,17 @@
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+      
+      <velocity_decay>
+        <linear>0.02</linear>
+        <angular>0.0005</angular>
+      </velocity_decay>
+      
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
       <gravity>1</gravity>
+      
       <visual name='visual'>
         <pose frame=''>0 0 -0.064 0 -0 0</pose>
         <geometry>
@@ -1698,7 +1705,7 @@
     
     <link name="Baselink">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>3.0618e-04</volume>
+      <volume>3e-5</volume>
     </link>
 
      <link name="HormToHorn1">
@@ -1723,22 +1730,22 @@
 
     <link name="middleLeg1">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>0.001511</volume>
     </link>
 
     <link name="middleLeg2">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>0.001511</volume>
     </link>
 
     <link name="middleLeg3">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>0.001511</volume>
     </link>
 
     <link name="middleLeg4">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>0.001511</volume>
     </link>
 
     <link name="endLeg1">
