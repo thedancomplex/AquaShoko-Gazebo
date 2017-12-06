@@ -18,6 +18,7 @@
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
+      <gravity>1</gravity>
       <visual name='visual'>
         <pose frame=''>0 0 -0.064 0 -0 0</pose>
         <geometry>
@@ -1040,7 +1041,7 @@
       <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0.064 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.051 0.173 0.424</size>
@@ -1139,7 +1140,7 @@
       <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0.064 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.051 0.173 0.424</size>
@@ -1238,7 +1239,7 @@
       <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0.064 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.051 0.173 0.424</size>
@@ -1691,6 +1692,76 @@
     <allow_auto_disable>1</allow_auto_disable>
 
   <plugin name='joint_control' filename='libaquashoko_gazebo_joint_control.so'/>
+
+   <plugin name="BuoyancyPlugin" filename="libBuoyancyPlugin.so">
+    <fluid_density>1000</fluid_density>
+    
+    <link name="Baselink">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>3.0618e-04</volume>
+    </link>
+
+     <link name="HormToHorn1">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="HormToHorn2">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="HormToHorn3">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="HormToHorn4">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="middleLeg1">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="middleLeg2">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="middleLeg3">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="middleLeg4">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="endLeg1">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="endLeg2">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="endLeg3">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="endLeg4">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+  </plugin>
 
   </model>
 </sdf>
