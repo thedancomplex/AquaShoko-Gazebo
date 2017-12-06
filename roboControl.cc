@@ -192,11 +192,11 @@ namespace gazebo
 
 	/* set ref to gazebo */
 	int ii = 0;
-        std::cout << "achControl()" << std::endl;
+        //std::cout << "achControl()" << std::endl;
 	for(int i = 0; i < AQUASHOKO_LEG_NUM; i++){
 		for(int j = 0; j < AQUASHOKO_LEG_JOINT_NUM; j++){
 			arrayJointRequest[ii] = aquashoko_get(i,j);
-    			std::cout << "arrayJointRequest[" << ii <<"] = " << arrayJointRequest[ii]<< std::endl;	
+    			//std::cout << "arrayJointRequest[" << ii <<"] = " << arrayJointRequest[ii]<< std::endl;	
 			ii++;
 		}
 	}
@@ -257,16 +257,16 @@ namespace gazebo
 		
 		//convert from degree to radians			
 		r11 = arrayJointRequest[0] * 3.1415 / 180;
-		r21 = arrayJointRequest[1] * 3.1415 / 180;
-		r31 = arrayJointRequest[2] * 3.1415 / 180;
-		r41 = arrayJointRequest[3] * 3.1415 / 180;
-			r12 = arrayJointRequest[4] * 3.1415 / 180;
-			r22 = arrayJointRequest[5] * 3.1415 / 180;
-			r32 = arrayJointRequest[6] * 3.1415 / 180;
-			r42 = arrayJointRequest[7] * 3.1415 / 180;
-				r13 = arrayJointRequest[8] * 3.1415 / 180;
-				r23 = arrayJointRequest[9] * 3.1415 / 180;
-				r33 = arrayJointRequest[10] * 3.1415 / 180;
+		r21 = arrayJointRequest[3] * 3.1415 / 180;
+		r31 = arrayJointRequest[6] * 3.1415 / 180;
+		r41 = arrayJointRequest[9] * 3.1415 / 180;
+			r12 = arrayJointRequest[1] * 3.1415 / 180;
+			r22 = arrayJointRequest[4] * 3.1415 / 180;
+			r32 = arrayJointRequest[7] * 3.1415 / 180;
+			r42 = arrayJointRequest[10] * 3.1415 / 180;
+				r13 = arrayJointRequest[2] * 3.1415 / 180;
+				r23 = arrayJointRequest[5] * 3.1415 / 180;
+				r33 = arrayJointRequest[8] * 3.1415 / 180;
 				r43 = arrayJointRequest[11] * 3.1415 / 180;
 
 		//Set controller Target Positions
