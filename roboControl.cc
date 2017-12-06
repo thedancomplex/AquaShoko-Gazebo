@@ -288,18 +288,18 @@ namespace gazebo
 		//convert rpm to 
 		rps = rpm * 0.1047;
 		//Set joint max velocity
-		this->model->GetJoint("jaw11")->SetVelocityLimit(1, rps);
-		this->model->GetJoint("jaw21")->SetVelocityLimit(1, rps);
-		this->model->GetJoint("jaw31")->SetVelocityLimit(1, rps);
-		this->model->GetJoint("jaw41")->SetVelocityLimit(1, rps);
-			this->model->GetJoint("pitch12")->SetVelocityLimit(1, rps);
-			this->model->GetJoint("pitch22")->SetVelocityLimit(1, rps);
-			this->model->GetJoint("pitch32")->SetVelocityLimit(1, rps);
-			this->model->GetJoint("pitch42")->SetVelocityLimit(1, rps);
-				this->model->GetJoint("pitch13")->SetVelocityLimit(1, rps);
-				this->model->GetJoint("pitch23")->SetVelocityLimit(1, rps);
-				this->model->GetJoint("pitch33")->SetVelocityLimit(1, rps);
-				this->model->GetJoint("pitch43")->SetVelocityLimit(1, rps);
+		this->model->GetJoint("jaw11")->SetVelocityLimit(0, rps);
+		this->model->GetJoint("jaw21")->SetVelocityLimit(0, rps);
+		this->model->GetJoint("jaw31")->SetVelocityLimit(0, rps);
+		this->model->GetJoint("jaw41")->SetVelocityLimit(0, rps);
+			this->model->GetJoint("pitch12")->SetVelocityLimit(0, rps);
+			this->model->GetJoint("pitch22")->SetVelocityLimit(0, rps);
+			this->model->GetJoint("pitch32")->SetVelocityLimit(0, rps);
+			this->model->GetJoint("pitch42")->SetVelocityLimit(0, rps);
+				this->model->GetJoint("pitch13")->SetVelocityLimit(0, rps);
+				this->model->GetJoint("pitch23")->SetVelocityLimit(0, rps);
+				this->model->GetJoint("pitch33")->SetVelocityLimit(0, rps);
+				this->model->GetJoint("pitch43")->SetVelocityLimit(0, rps);
 
 	}
 
