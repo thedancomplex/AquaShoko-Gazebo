@@ -4,14 +4,14 @@
     <link name='Baselink'>
       <pose frame=''>0 0 0.1 0 -0 0</pose>
       <inertial>
-        <mass>2.55</mass>
+        <mass>2.564</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>10</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>10</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>10</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -110,14 +110,14 @@
     <link name='HormToHorn1'>
       <pose frame=''>0.145 0 0.17 0 -0 3.14</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-6</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-6</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-6</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -209,14 +209,14 @@
     <link name='HormToHorn2'>
       <pose frame=''>0 0.145 0.17 0 0 -1.57</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-6</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-6</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-6</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -308,14 +308,14 @@
     <link name='HormToHorn3'>
       <pose frame=''>-0.145 0 0.17 0 -0 0</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-6</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-6</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-6</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -407,14 +407,14 @@
     <link name='HormToHorn4'>
       <pose frame=''>0 -0.145 0.17 0 -0 1.57</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-6</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-6</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-6</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -506,17 +506,23 @@
     <link name='endLeg1'>
       <pose frame=''>0.180014 0.009444 0.22 0 -0 0</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.001</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -606,17 +612,23 @@
     <link name='endLeg2'>
       <pose frame=''>-0.009528 0.179992 0.22 0 -0 1.57</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.001</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -706,17 +718,23 @@
     <link name='endLeg3'>
       <pose frame=''>-0.18 -0.0095 0.22 0 -0 3.14</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.001</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -806,17 +824,23 @@
     <link name='endLeg4'>
       <pose frame=''>0.009472 -0.180008 0.22 0 0 -1.57319</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.001</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -906,17 +930,23 @@
     <link name='middleLeg1'>
       <pose frame=''>0.144995 -0.0025 0.312 0 -0 3.14</pose>
       <inertial>
-        <mass>1.39</mass>
+        <mass>1.396</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.079</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.064</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.018</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.002</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -1005,17 +1035,23 @@
     <link name='middleLeg2'>
       <pose frame=''>0.0025 0.145002 0.312 0 0 -1.57</pose>
       <inertial>
-        <mass>1.39</mass>
+        <mass>1.396</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.079</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.064</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.018</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.002</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -1104,17 +1140,23 @@
     <link name='middleLeg3'>
       <pose frame=''>-0.145 0.0025 0.312 0 -0 0</pose>
       <inertial>
-        <mass>1.39</mass>
+        <mass>1.396</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.079</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.064</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.018</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.002</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -1203,17 +1245,23 @@
     <link name='middleLeg4'>
       <pose frame=''>-0.0025 -0.144998 0.3129 0 -0 1.57</pose>
       <inertial>
-        <mass>1.39</mass>
+        <mass>1.396</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.079</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.064</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.018</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.002</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+      
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -1705,7 +1753,7 @@
     
     <link name="Baselink">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>3e-5</volume>
+      <volume>0.001</volume>
     </link>
 
      <link name="HormToHorn1">
@@ -1730,42 +1778,42 @@
 
     <link name="middleLeg1">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>0.001511</volume>
+      <volume>5.668e-4</volume>
     </link>
 
     <link name="middleLeg2">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>0.001511</volume>
+      <volume>5.668e-4</volume>
     </link>
 
     <link name="middleLeg3">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>0.001511</volume>
+      <volume>5.668e-4</volume>
     </link>
 
     <link name="middleLeg4">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>0.001511</volume>
+      <volume>5.668e-4</volume>
     </link>
 
     <link name="endLeg1">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>3.605e-5</volume>
     </link>
 
     <link name="endLeg2">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>3.605e-5</volume>
     </link>
 
     <link name="endLeg3">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>3.605e-5</volume>
     </link>
 
     <link name="endLeg4">
       <center_of_volume>0 0 0 </center_of_volume>
-      <volume>1e-20</volume>
+      <volume>3.605e-5</volume>
     </link>
 
   </plugin>
