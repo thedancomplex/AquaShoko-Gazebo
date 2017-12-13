@@ -89,7 +89,7 @@ def aquashoko_init():
 
 def aquashoko_get(leg, joint):
   global aquashoko_ref, aquashoko_chan_ref
-  return aquashoko_ref.leg[leg].joint[joint].ref
+  return aquashoko_ref.leg[leg].joint[joint].pos
 
 def aquashoko_set(leg, joint, value):
   global aquashoko_ref, aquashoko_chan_ref

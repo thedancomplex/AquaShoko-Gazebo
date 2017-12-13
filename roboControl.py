@@ -41,6 +41,7 @@ import aquashoko
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
+import copy
 
 def callback(data):
 #    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.name)
@@ -69,9 +70,38 @@ def listener():
     rospy.init_node('aquashoko_listener', anonymous=False)
 
     rospy.Subscriber('aquashoko_chatter', JointState, callback)
+    joint_state_pub = rospy.Publisher('aquashoko_joint_positions', JointState, queue_size = 1)
+    joint_msg = JointState()
+    joint_positions = [0,0,0, 0,0,0, 0,0,0, 0,0,0]
 
     # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
+    while not rospy.is_shutdown():
+        rospy.sleep(0.001)
+        aquashoko.aquashoko_pull();
+        joint_msg.header.stamp = rospy.Time.now()
+        
+        #n = 0
+        #for i in range(4):
+        #    for j in range(3):
+        #        joint_positions[n*i+j]  = aquashoko.aquashoko_get(i,j)
+        #    n = n + 1 
+        joint_positions[0]  = aquashoko.aquashoko_get(0,0)
+        joint_positions[1]  = aquashoko.aquashoko_get(0,1)
+        joint_positions[2]  = aquashoko.aquashoko_get(0,2)
+        joint_positions[3]  = aquashoko.aquashoko_get(1,0)
+        joint_positions[4]  = aquashoko.aquashoko_get(1,1)
+        joint_positions[5]  = aquashoko.aquashoko_get(1,2)
+        joint_positions[6]  = aquashoko.aquashoko_get(2,0)
+        joint_positions[7]  = aquashoko.aquashoko_get(2,1)
+        joint_positions[8]  = aquashoko.aquashoko_get(2,2)
+        joint_positions[9]  = aquashoko.aquashoko_get(3,0)
+        joint_positions[10]  = aquashoko.aquashoko_get(3,1)
+        joint_positions[11]  = aquashoko.aquashoko_get(3,2)
+
+        joint_msg.position = copy.deepcopy(joint_positions)
+        joint_state_pub.publish(joint_msg)
+        #print aquashoko.aquashoko_get(0,1)
+        #rospy.spin()
 
 if __name__ == '__main__':
     listener()

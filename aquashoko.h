@@ -38,7 +38,7 @@ ach_channel_t aquashoko_chan_ref;  // reference channel
 
 int aquashoko_set(int leg, int joint, double value)
 {
-  aquashoko_ref.leg[leg].joint[joint].ref = value;
+  aquashoko_ref.leg[leg].joint[joint].pos = value;
   return 0;
 }
 

@@ -9,20 +9,25 @@
 #include "aquashoko.h"
 
 
-
-
 //PID values Jaw
-float ProJaw = 350; //proportional control
-float InteJaw = 0; //integral control
-float DereJaw = 110; //derivative control
+float ProJaw = 1.0; //proportional control
+float InteJaw = 0.10; //integral control
+float DereJaw = 1.4; //derivative control
+float iMaxYaw = 8.4; 
+
+
+//PID values Pitch #1
+float ProPitch1 = 0.8; //proportional control
+float IntePitch1 = 0.8; //integral control
+float DerePitch1 = 0.2; //derivative control
+float iMaxPitch1 = 8.4; 
+
 //PID values Pitch #2
-float ProPitch1 = 450; //proportional control
-float IntePitch1 = 0; //integral control
-float DerePitch1 = 230; //derivative control
-//PID values Pitch #2
-float ProPitch2 = 250; //proportional control
-float IntePitch2 = 0; //integral control
-float DerePitch2 = 55; //derivative control
+float ProPitch2 = 0.5; //250; //proportional control
+float IntePitch2 = 0.2; //integral control
+float DerePitch2 = 0.35; //derivative control
+float iMaxPitch2 = 8.4; 
+
 
 //for use in reading joint position			
 float arrayJointPositions[12] = {}; 	
@@ -79,18 +84,18 @@ namespace gazebo
 		//Store the pointer to controller
 		this->ShokoControl = new physics::JointController(_parent);
 		// Setup a PID controller
- 		this->pid11 = common::PID(ProJaw, InteJaw, DereJaw);
- 		this->pid21 = common::PID(ProJaw, InteJaw, DereJaw);
- 		this->pid31 = common::PID(ProJaw, InteJaw, DereJaw);
- 		this->pid41 = common::PID(ProJaw, InteJaw, DereJaw);
- 			this->pid12 = common::PID(ProPitch1, IntePitch1, DerePitch1);
- 			this->pid22 = common::PID(ProPitch1, IntePitch1, DerePitch1);
- 			this->pid32 = common::PID(ProPitch1, IntePitch1, DerePitch1);
- 			this->pid42 = common::PID(ProPitch1, IntePitch1, DerePitch1);
- 				this->pid13 = common::PID(ProPitch2, IntePitch2, DerePitch2);
- 				this->pid23 = common::PID(ProPitch2, IntePitch2, DerePitch2);
- 				this->pid33 = common::PID(ProPitch2, IntePitch2, DerePitch2);
- 				this->pid43 = common::PID(ProPitch2, IntePitch2, DerePitch2);
+ 		this->pid11 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
+ 		this->pid21 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
+ 		this->pid31 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
+ 		this->pid41 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
+ 			this->pid12 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
+ 			this->pid22 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
+ 			this->pid32 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
+ 			this->pid42 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
+ 				this->pid13 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
+ 				this->pid23 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
+ 				this->pid33 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
+ 				this->pid43 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
  				
  		this->ID11 = this->model->GetJoint("jaw11");
  		this->ID21 = this->model->GetJoint("jaw21");
@@ -188,6 +193,7 @@ namespace gazebo
     void achControl()
     {
 	/* get update */
+	
 	aquashoko_pull();
 
 	/* set ref to gazebo */
@@ -201,9 +207,9 @@ namespace gazebo
 		}
 	}
  
-         setJointsPosition(300);
+    setJointsPosition(300);
 
-
+    printJointPositions();
 
     }
 
@@ -243,9 +249,25 @@ namespace gazebo
     {   				
     	getJointPositions();
     	//print current positions to terminal			
-    	std::cout <<" p11:"<< arrayJointPositions[0] << " p21:"<< arrayJointPositions[1] << " p31:"<< arrayJointPositions[2] << " p41:"<< arrayJointPositions[3] << std::endl;
-    	std::cout << " p12:"<< arrayJointPositions[4] << " p22:"<< arrayJointPositions[5] << " p32:"<< arrayJointPositions[6] << " p42:"<< arrayJointPositions[7] << std::endl;
-    	std::cout << " p13:"<< arrayJointPositions[8] << " p23:"<< arrayJointPositions[9] << " p33:"<< arrayJointPositions[10] << " p43:"<< arrayJointPositions[11] << std::endl;
+    	//std::cout <<" p11:"<< arrayJointPositions[0] << " p21:"<< arrayJointPositions[1] << " p31:"<< arrayJointPositions[2] << " p41:"<< arrayJointPositions[3] << std::endl;
+    	//std::cout << " p12:"<< arrayJointPositions[4] << " p22:"<< arrayJointPositions[5] << " p32:"<< arrayJointPositions[6] << " p42:"<< arrayJointPositions[7] << std::endl;
+    	//std::cout << " p13:"<< arrayJointPositions[8] << " p23:"<< arrayJointPositions[9] << " p33:"<< arrayJointPositions[10] << " p43:"<< arrayJointPositions[11] << std::endl;
+    	
+    	aquashoko_set(0,0, arrayJointPositions[0]);
+    	aquashoko_set(0,1, arrayJointPositions[4]);
+    	aquashoko_set(0,2, arrayJointPositions[8]);
+    	aquashoko_set(1,0, arrayJointPositions[1]);
+    	aquashoko_set(1,1, arrayJointPositions[5]);
+    	aquashoko_set(1,2, arrayJointPositions[9]);
+    	aquashoko_set(2,0, arrayJointPositions[2]);
+    	aquashoko_set(2,1, arrayJointPositions[6]);
+    	aquashoko_set(2,2, arrayJointPositions[10]);
+    	aquashoko_set(3,0, arrayJointPositions[3]);
+    	aquashoko_set(3,1, arrayJointPositions[7]);
+    	aquashoko_set(3,2, arrayJointPositions[11]);
+
+    	aquashoko_put();
+    	
     }
     
     
