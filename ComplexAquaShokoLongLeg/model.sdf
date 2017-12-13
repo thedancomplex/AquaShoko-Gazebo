@@ -109,17 +109,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn1'>
       <pose frame=''>0.145 0 0.17 0 -0 3.14</pose>
       <inertial>
         <mass>0.003</mass>
         <inertia>
-          <ixx>1e-6</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1e-6</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1e-6</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -208,17 +209,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn2'>
       <pose frame=''>0 0.145 0.17 0 0 -1.57</pose>
       <inertial>
         <mass>0.003</mass>
         <inertia>
-          <ixx>1e-6</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1e-6</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1e-6</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -307,17 +309,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn3'>
       <pose frame=''>-0.145 0 0.17 0 -0 0</pose>
       <inertial>
         <mass>0.003</mass>
         <inertia>
-          <ixx>1e-6</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1e-6</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1e-6</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -406,17 +409,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn4'>
       <pose frame=''>0 -0.145 0.17 0 -0 1.57</pose>
       <inertial>
         <mass>0.003</mass>
         <inertia>
-          <ixx>1e-6</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1e-6</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1e-6</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -505,6 +509,7 @@
         </surface>
       </collision>
     </link>
+
     <link name='endLeg1'>
       <pose frame=''>0.180014 0.009444 0.22 0 -0 0</pose>
       <inertial>
@@ -1470,9 +1475,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1488,6 +1493,7 @@
         </ode>
       </physics>
     </joint>
+
     <joint name='jaw21' type='revolute'>
       <parent>Baselink</parent>
       <child>HormToHorn2</child>
@@ -1503,9 +1509,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1521,6 +1527,7 @@
         </ode>
       </physics>
     </joint>
+
     <joint name='jaw31' type='revolute'>
       <parent>Baselink</parent>
       <child>HormToHorn3</child>
@@ -1536,9 +1543,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1554,6 +1561,7 @@
         </ode>
       </physics>
     </joint>
+
     <joint name='jaw41' type='revolute'>
       <parent>Baselink</parent>
       <child>HormToHorn4</child>
@@ -1569,9 +1577,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1587,6 +1595,7 @@
         </ode>
       </physics>
     </joint>
+
     <joint name='pitch12' type='revolute'>
       <parent>HormToHorn1</parent>
       <child>middleLeg1</child>
@@ -1602,9 +1611,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1642,9 +1651,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1675,9 +1684,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1708,9 +1717,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1742,9 +1751,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1783,9 +1792,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1817,9 +1826,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1851,9 +1860,9 @@
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
+          <spring_stiffness>0.1</spring_stiffness>
           <friction>0.0</friction>
-          <friction>0.0</friction>
+          <damping>0.25</damping>
         </dynamics>
       </axis>
       <physics>

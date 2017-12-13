@@ -10,9 +10,9 @@
 
 
 //PID values Jaw
-float ProJaw = 1.0; //proportional control
-float InteJaw = 0.10; //integral control
-float DereJaw = 1.4; //derivative control
+float ProJaw = 0.5; //proportional control
+float InteJaw = 0.1; //integral control
+float DereJaw = 0.1; //derivative control
 float iMaxYaw = 8.4; 
 
 
