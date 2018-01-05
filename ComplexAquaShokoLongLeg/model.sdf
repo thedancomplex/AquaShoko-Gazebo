@@ -19,8 +19,8 @@
       </inertial>
       
       <velocity_decay>
-        <linear>0.9</linear>
-        <angular>0.02</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
       
       <self_collide>0</self_collide>
@@ -526,8 +526,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -632,8 +632,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -738,8 +738,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -844,8 +844,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -950,8 +950,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -1058,7 +1058,7 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
+        <linear>0.01</linear>
         <angular>0.001</angular>
       </velocity_decay>
 
@@ -1109,8 +1109,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -1215,8 +1215,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -1321,7 +1321,7 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
+        <linear>0.01</linear>
         <angular>0.001</angular>
       </velocity_decay>
 
@@ -1370,8 +1370,8 @@
       </inertial>
 
       <velocity_decay>
-        <linear>0.0</linear>
-        <angular>0.001</angular>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
       </velocity_decay>
 
       <self_collide>0</self_collide>
@@ -1470,14 +1470,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1491,6 +1491,7 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
 
@@ -1504,14 +1505,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1525,6 +1526,7 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
 
@@ -1538,14 +1540,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1559,6 +1561,7 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
 
@@ -1572,14 +1575,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1593,6 +1596,7 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
 
@@ -1606,14 +1610,14 @@
         <limit>
           <lower>-4</lower>
           <upper>4</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1646,14 +1650,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1679,14 +1683,14 @@
         <limit>
           <lower>-1.9</lower>
           <upper>1.9</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1712,14 +1716,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1746,14 +1750,14 @@
         <limit>
           <lower>-4</lower>
           <upper>4</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1787,14 +1791,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1821,14 +1825,14 @@
         <limit>
           <lower>-1.9</lower>
           <upper>1.9</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1855,14 +1859,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0.1</spring_stiffness>
+          <spring_stiffness>0.0</spring_stiffness>
           <friction>0.0</friction>
-          <damping>0.25</damping>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1969,7 +1973,7 @@
       <topicName>imu</topicName>
       <serviceName>imu_service</serviceName>
       <gaussianNoise>0.0</gaussianNoise>
-      <updateRate>20.0</updateRate>
+      <updateRate>50.0</updateRate>
   </plugin>
 
   </model>
