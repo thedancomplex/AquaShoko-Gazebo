@@ -41,7 +41,31 @@ import aquashoko
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
+from aquashoko_ros.cfg import AquashokoJointControlParamsConfig
+from dynamic_reconfigure.server import Server
 import copy
+config_start = False
+yaw1_pid = aquashoko.AQUASHOKO_PID()
+pitch2_pid = aquashoko.AQUASHOKO_PID()
+pitch3_pid = aquashoko.AQUASHOKO_PID()
+
+yaw1_pid.kp = 10
+yaw1_pid.ki = 0.2
+yaw1_pid.kd = 2.5
+yaw1_pid.upplim = 10.0
+yaw1_pid.lowlim = -10.0
+
+pitch2_pid.kp = 2.0
+pitch2_pid.ki = 1.0
+pitch2_pid.kd = 0.25
+pitch2_pid.upplim = 10.0
+pitch2_pid.lowlim = -10.0
+
+pitch3_pid.kp = 2.0
+pitch3_pid.ki = 1.0
+pitch3_pid.kd = 0.25
+pitch3_pid.upplim = 10.0
+pitch3_pid.lowlim = -10.0
 
 def callback(data):
 #    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data.name)
@@ -60,6 +84,7 @@ def callback(data):
     aquashoko.aquashoko_put()
 
 def listener():
+    global yaw1_pid, pitch2_pid, pitch3_pid
     aquashoko.aquashoko_init()
 
     # In ROS, nodes are uniquely named. If two nodes with the same
@@ -73,6 +98,18 @@ def listener():
     joint_state_pub = rospy.Publisher('aquashoko_joint_positions', JointState, queue_size = 1)
     joint_msg = JointState()
     joint_positions = [0,0,0, 0,0,0, 0,0,0, 0,0,0]
+
+    cfg_server = Server(AquashokoJointControlParamsConfig, cfg_callback)
+
+    aquashoko.aquashoko_set_pid(0, yaw1_pid)
+    aquashoko.aquashoko_set_pid(1, pitch2_pid)
+    aquashoko.aquashoko_set_pid(2, pitch3_pid)
+            
+
+    for i in range(5):
+        aquashoko.aquashoko_put_pids()
+        rospy.sleep(0.1)
+        # this callback should return config data back to server
 
     # spin() simply keeps python from exiting until this node is stopped
     while not rospy.is_shutdown():
@@ -102,6 +139,60 @@ def listener():
         joint_state_pub.publish(joint_msg)
         #print aquashoko.aquashoko_get(0,1)
         #rospy.spin()
+
+def cfg_callback(config, level):
+        global config_start, yaw1_pid, pitch2_pid, pitch3_pid
+
+        if not config_start:
+            # callback is called for the first time. Use this to set the new params to the config server
+            config.yaw1_kp = yaw1_pid.kp
+            config.yaw1_ki = yaw1_pid.ki
+            config.yaw1_kd = yaw1_pid.kd
+            config.yaw1_upplim = yaw1_pid.upplim
+            config.yaw1_lowlim = yaw1_pid.lowlim
+
+            config.pitch2_kp = pitch2_pid.kp
+            config.pitch2_ki = pitch2_pid.ki
+            config.pitch2_kd = pitch2_pid.kd
+            config.pitch2_upplim = pitch2_pid.upplim
+            config.pitch2_lowlim = pitch2_pid.lowlim
+
+            config.pitch3_kp = pitch3_pid.kp
+            config.pitch3_ki = pitch3_pid.ki
+            config.pitch3_kd = pitch3_pid.kd
+            config.pitch3_upplim = pitch3_pid.upplim
+            config.pitch3_lowlim = pitch3_pid.lowlim
+            
+            config_start = True
+        else:
+            # The following code just sets up the P,I,D gains for all controllers
+            yaw1_pid.kp = config.yaw1_kp
+            yaw1_pid.ki = config.yaw1_ki
+            yaw1_pid.kd = config.yaw1_kd
+            yaw1_pid.upplim = config.yaw1_upplim 
+            yaw1_pid.lowlim = config.yaw1_lowlim 
+
+            pitch2_pid.kp = config.pitch2_kp
+            pitch2_pid.ki = config.pitch2_ki
+            pitch2_pid.kd = config.pitch2_kd
+            pitch2_pid.upplim = config.pitch2_upplim
+            pitch2_pid.lowlim = config.pitch2_lowlim
+
+            pitch3_pid.kp = config.pitch3_kp
+            pitch3_pid.ki = config.pitch3_ki
+            pitch3_pid.kd = config.pitch3_kd
+            pitch3_pid.upplim = config.pitch3_upplim
+            pitch3_pid.lowlim = config.pitch3_lowlim
+            
+            aquashoko.aquashoko_set_pid(0, yaw1_pid)
+            aquashoko.aquashoko_set_pid(1, pitch2_pid)
+            aquashoko.aquashoko_set_pid(2, pitch3_pid)
+            aquashoko.aquashoko_put_pids()
+
+            #for i in range(10):
+            #    aquashoko.aquashoko_put_pids()
+        # this callback should return config data back to server
+        return config
 
 if __name__ == '__main__':
     listener()

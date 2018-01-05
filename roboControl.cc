@@ -10,23 +10,27 @@
 
 
 //PID values Jaw
-float ProJaw = 0.5; //proportional control
-float InteJaw = 0.1; //integral control
-float DereJaw = 0.1; //derivative control
-float iMaxYaw = 8.4; 
+float ProJaw = 10.0; //proportional control
+float InteJaw = 0.2; //integral control
+float DereJaw = 2.5; //derivative control
+float iMaxYaw = 10.0; 
 
 
 //PID values Pitch #1
-float ProPitch1 = 0.8; //proportional control
-float IntePitch1 = 0.8; //integral control
-float DerePitch1 = 0.2; //derivative control
-float iMaxPitch1 = 8.4; 
+float ProPitch1 = 2.0; //proportional control
+float IntePitch1 = 1.0; //integral control
+float DerePitch1 = 0.25; //derivative control
+float iMaxPitch1 = 10.0; 
 
 //PID values Pitch #2
-float ProPitch2 = 0.5; //250; //proportional control
-float IntePitch2 = 0.2; //integral control
-float DerePitch2 = 0.35; //derivative control
-float iMaxPitch2 = 8.4; 
+float ProPitch2 = 2.0; //250; //proportional control
+float IntePitch2 = 1.0; //integral control
+float DerePitch2 = 0.1; //derivative control
+float iMaxPitch2 = 10.0; 
+
+aquashoko_pid_t yaw1_pid;
+aquashoko_pid_t pitch2_pid;
+aquashoko_pid_t pitch3_pid;
 
 
 //for use in reading joint position			
@@ -78,24 +82,42 @@ namespace gazebo
 
 		// Store the pointer to the model
 		this->model = _parent;
+
+		yaw1_pid.kp = 1.0;
+		yaw1_pid.ki = 0.1;
+		yaw1_pid.kd = 0.25;
+		yaw1_pid.upplim = 10.0;
+		yaw1_pid.lowlim = -10.0;
+
+		pitch2_pid.kp = 20.0;
+		pitch2_pid.ki = 0.2;
+		pitch2_pid.kd = 5.0;
+		pitch2_pid.upplim = 10.0;
+		pitch2_pid.lowlim = -10.0;
+
+		pitch3_pid.kp = 2.0;
+		pitch3_pid.ki = 1.0;
+		pitch3_pid.kd = 0.25;
+		pitch3_pid.upplim = 10.0;
+		pitch3_pid.lowlim = -10.0;
 		
 		
 		//  -----------------------------  Joint Controller Setup -----------------------------
 		//Store the pointer to controller
 		this->ShokoControl = new physics::JointController(_parent);
 		// Setup a PID controller
- 		this->pid11 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
- 		this->pid21 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
- 		this->pid31 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
- 		this->pid41 = common::PID(ProJaw, InteJaw, DereJaw, iMaxYaw, -iMaxYaw);
- 			this->pid12 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
- 			this->pid22 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
- 			this->pid32 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
- 			this->pid42 = common::PID(ProPitch1, IntePitch1, DerePitch1, iMaxPitch1, -iMaxPitch1);
- 				this->pid13 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
- 				this->pid23 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
- 				this->pid33 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
- 				this->pid43 = common::PID(ProPitch2, IntePitch2, DerePitch2, iMaxPitch2, -iMaxPitch2);
+ 		this->pid11 = common::PID(yaw1_pid.kp, yaw1_pid.ki, yaw1_pid.kd, yaw1_pid.upplim, yaw1_pid.lowlim, yaw1_pid.upplim, yaw1_pid.lowlim);
+ 		this->pid21 = common::PID(yaw1_pid.kp, yaw1_pid.ki, yaw1_pid.kd, yaw1_pid.upplim, yaw1_pid.lowlim, yaw1_pid.upplim, yaw1_pid.lowlim);
+ 		this->pid31 = common::PID(yaw1_pid.kp, yaw1_pid.ki, yaw1_pid.kd, yaw1_pid.upplim, yaw1_pid.lowlim, yaw1_pid.upplim, yaw1_pid.lowlim);
+ 		this->pid41 = common::PID(yaw1_pid.kp, yaw1_pid.ki, yaw1_pid.kd, yaw1_pid.upplim, yaw1_pid.lowlim, yaw1_pid.upplim, yaw1_pid.lowlim);
+ 			this->pid12 = common::PID(pitch2_pid.kp, pitch2_pid.ki, pitch2_pid.kd, pitch2_pid.upplim, pitch2_pid.lowlim, pitch2_pid.upplim, pitch2_pid.lowlim);
+ 			this->pid22 = common::PID(pitch2_pid.kp, pitch2_pid.ki, pitch2_pid.kd, pitch2_pid.upplim, pitch2_pid.lowlim, pitch2_pid.upplim, pitch2_pid.lowlim);
+ 			this->pid32 = common::PID(pitch2_pid.kp, pitch2_pid.ki, pitch2_pid.kd, pitch2_pid.upplim, pitch2_pid.lowlim, pitch2_pid.upplim, pitch2_pid.lowlim);
+ 			this->pid42 = common::PID(pitch2_pid.kp, pitch2_pid.ki, pitch2_pid.kd, pitch2_pid.upplim, pitch2_pid.lowlim, pitch2_pid.upplim, pitch2_pid.lowlim);
+ 				this->pid13 = common::PID(pitch3_pid.kp, pitch3_pid.ki, pitch3_pid.kd, pitch3_pid.upplim, pitch3_pid.lowlim, pitch3_pid.upplim, pitch3_pid.lowlim);
+ 				this->pid23 = common::PID(pitch3_pid.kp, pitch3_pid.ki, pitch3_pid.kd, pitch3_pid.upplim, pitch3_pid.lowlim, pitch3_pid.upplim, pitch3_pid.lowlim);
+ 				this->pid33 = common::PID(pitch3_pid.kp, pitch3_pid.ki, pitch3_pid.kd, pitch3_pid.upplim, pitch3_pid.lowlim, pitch3_pid.upplim, pitch3_pid.lowlim);
+ 				this->pid43 = common::PID(pitch3_pid.kp, pitch3_pid.ki, pitch3_pid.kd, pitch3_pid.upplim, pitch3_pid.lowlim, pitch3_pid.upplim, pitch3_pid.lowlim);
  				
  		this->ID11 = this->model->GetJoint("jaw11");
  		this->ID21 = this->model->GetJoint("jaw21");
@@ -114,10 +136,12 @@ namespace gazebo
   		this->model->GetJointController()->SetPositionPID(this->ID21->GetScopedName(), this->pid21);
 		this->model->GetJointController()->SetPositionPID(this->ID31->GetScopedName(), this->pid31);
 		this->model->GetJointController()->SetPositionPID(this->ID41->GetScopedName(), this->pid41);
+			
 			this->model->GetJointController()->SetPositionPID(this->ID12->GetScopedName(), this->pid12);
 			this->model->GetJointController()->SetPositionPID(this->ID22->GetScopedName(), this->pid22);
 			this->model->GetJointController()->SetPositionPID(this->ID32->GetScopedName(), this->pid32);
 			this->model->GetJointController()->SetPositionPID(this->ID42->GetScopedName(), this->pid42);
+			
 				this->model->GetJointController()->SetPositionPID(this->ID13->GetScopedName(), this->pid13);
 				this->model->GetJointController()->SetPositionPID(this->ID23->GetScopedName(), this->pid23);
 				this->model->GetJointController()->SetPositionPID(this->ID33->GetScopedName(), this->pid33);
@@ -192,24 +216,49 @@ namespace gazebo
 
     void achControl()
     {
-	/* get update */
-	
-	aquashoko_pull();
+		/* get update */
+		
+		aquashoko_pull();
 
-	/* set ref to gazebo */
-	int ii = 0;
-        //std::cout << "achControl()" << std::endl;
-	for(int i = 0; i < AQUASHOKO_LEG_NUM; i++){
-		for(int j = 0; j < AQUASHOKO_LEG_JOINT_NUM; j++){
-			arrayJointRequest[ii] = aquashoko_get(i,j);
-    			//std::cout << "arrayJointRequest[" << ii <<"] = " << arrayJointRequest[ii]<< std::endl;	
-			ii++;
+		/* set ref to gazebo */
+		int ii = 0;
+	        //std::cout << "achControl()" << std::endl;
+		for(int i = 0; i < AQUASHOKO_LEG_NUM; i++){
+			for(int j = 0; j < AQUASHOKO_LEG_JOINT_NUM; j++){
+				arrayJointRequest[ii] = aquashoko_get(i,j);
+	    			//std::cout << "arrayJointRequest[" << ii <<"] = " << arrayJointRequest[ii]<< std::endl;	
+				ii++;
+			}
 		}
-	}
- 
-    setJointsPosition(300);
+	 
+	    setJointsPosition(3000);
 
-    printJointPositions();
+	    printJointPositions();
+
+	    int status = aquashoko_pull_pid_params();
+
+	    if (status == ACH_OK)
+	    {
+	    	// new params arrived
+	    	std::cout << "============New pid params arrived =============." << std::endl;
+	    	
+	    	aquashoko_get_pid_params(0, yaw1_pid);
+	    	aquashoko_get_pid_params(1, pitch2_pid);
+	    	aquashoko_get_pid_params(2, pitch3_pid);
+	    	std::cout << yaw1_pid.kp << " " << yaw1_pid.ki << " " << yaw1_pid.kd <<
+	    	 " " << yaw1_pid.upplim << " " << yaw1_pid.lowlim << " "  << std::endl;
+
+	    	 std::cout << pitch2_pid.kp << " " << pitch2_pid.ki << " " << pitch2_pid.kd <<
+	    	 " " << pitch2_pid.upplim << " " << pitch2_pid.lowlim << " "  << std::endl;
+
+	    	 std::cout << pitch3_pid.kp << " " << pitch3_pid.ki << " " << pitch3_pid.kd <<
+	    	 " " << pitch3_pid.upplim << " " << pitch3_pid.lowlim << " "  << std::endl << "===============================";
+
+	    	 setPidParameters();
+
+
+	    }
+	    //getJointForceTorque();
 
     }
 
@@ -218,6 +267,7 @@ namespace gazebo
 
     void getJointPositions()
     {
+    	
     	math::Angle id11 = this->model->GetJoint("jaw11")-> GetAngle(0);
     	arrayJointPositions[0] = id11.Degree();
     		math::Angle id21 = this->model->GetJoint("jaw21")-> GetAngle(0);
@@ -226,6 +276,7 @@ namespace gazebo
     			arrayJointPositions[2] = id31.Degree();
     				math::Angle id41 = this->model->GetJoint("jaw41")-> GetAngle(0);
     				arrayJointPositions[3] = id41.Degree();
+    	
     	math::Angle id12 = this->model->GetJoint("pitch12")-> GetAngle(0);
     	arrayJointPositions[4] = id12.Degree();
     		math::Angle id22 = this->model->GetJoint("pitch22")-> GetAngle(0);
@@ -234,6 +285,8 @@ namespace gazebo
     			arrayJointPositions[6] = id32.Degree();
     				math::Angle id42 = this->model->GetJoint("pitch42")-> GetAngle(0);
     				arrayJointPositions[7] = id42.Degree();
+
+    	
     	math::Angle id13 = this->model->GetJoint("pitch13")-> GetAngle(0);
     	arrayJointPositions[8] = id13.Degree();
     		math::Angle id23 = this->model->GetJoint("pitch23")-> GetAngle(0);
@@ -241,9 +294,20 @@ namespace gazebo
 				math::Angle id33 = this->model->GetJoint("pitch33")-> GetAngle(0);
     			arrayJointPositions[10] = id33.Degree();
     				math::Angle id43 = this->model->GetJoint("pitch43")-> GetAngle(0);
-    				arrayJointPositions[11] = id43.Degree();	
+    				arrayJointPositions[11] = id43.Degree();
+    	
+
+
     }
     
+    void getJointForceTorque()
+    {
+    	gazebo::physics::JointWrench joint_ft = this->model->GetJoint("jaw11")-> GetForceTorque(0);
+    	std::cout << joint_ft.body1Force << joint_ft.body1Torque << std::endl;
+    	std::cout << joint_ft.body2Force << joint_ft.body2Torque << std::endl;
+    	std::cout << "=====================================" << std::endl;
+
+    }
     
     void  printJointPositions()
     {   				
@@ -296,10 +360,12 @@ namespace gazebo
 		this->model->GetJointController()->SetPositionTarget(this->ID21->GetScopedName(), r21);
 		this->model->GetJointController()->SetPositionTarget(this->ID31->GetScopedName(), r31);
 		this->model->GetJointController()->SetPositionTarget(this->ID41->GetScopedName(), r41);
+		
 			this->model->GetJointController()->SetPositionTarget(this->ID12->GetScopedName(), r12);
 			this->model->GetJointController()->SetPositionTarget(this->ID22->GetScopedName(), r22);
 			this->model->GetJointController()->SetPositionTarget(this->ID32->GetScopedName(), r32);
 			this->model->GetJointController()->SetPositionTarget(this->ID42->GetScopedName(), r42);
+		
 				this->model->GetJointController()->SetPositionTarget(this->ID13->GetScopedName(), r13);
 				this->model->GetJointController()->SetPositionTarget(this->ID23->GetScopedName(), r23);
 				this->model->GetJointController()->SetPositionTarget(this->ID33->GetScopedName(), r33);
@@ -310,18 +376,139 @@ namespace gazebo
 		//convert rpm to 
 		rps = rpm * 0.1047;
 		//Set joint max velocity
+		
 		this->model->GetJoint("jaw11")->SetVelocityLimit(0, rps);
 		this->model->GetJoint("jaw21")->SetVelocityLimit(0, rps);
 		this->model->GetJoint("jaw31")->SetVelocityLimit(0, rps);
 		this->model->GetJoint("jaw41")->SetVelocityLimit(0, rps);
+		
 			this->model->GetJoint("pitch12")->SetVelocityLimit(0, rps);
 			this->model->GetJoint("pitch22")->SetVelocityLimit(0, rps);
 			this->model->GetJoint("pitch32")->SetVelocityLimit(0, rps);
 			this->model->GetJoint("pitch42")->SetVelocityLimit(0, rps);
+		
+		
 				this->model->GetJoint("pitch13")->SetVelocityLimit(0, rps);
 				this->model->GetJoint("pitch23")->SetVelocityLimit(0, rps);
 				this->model->GetJoint("pitch33")->SetVelocityLimit(0, rps);
 				this->model->GetJoint("pitch43")->SetVelocityLimit(0, rps);
+		
+
+	}
+
+	void setPidParameters()
+	{
+		this->pid11.SetPGain(yaw1_pid.kp);
+		this->pid11.SetIGain(yaw1_pid.ki);
+		this->pid11.SetDGain(yaw1_pid.kd);
+		this->pid11.SetCmdMax(yaw1_pid.upplim);
+		this->pid11.SetCmdMin(yaw1_pid.lowlim);
+		this->pid11.SetIMax(yaw1_pid.upplim);
+		this->pid11.SetIMin(yaw1_pid.lowlim);
+
+		this->pid21.SetPGain(yaw1_pid.kp);
+		this->pid21.SetIGain(yaw1_pid.ki);
+		this->pid21.SetDGain(yaw1_pid.kd);
+		this->pid21.SetCmdMax(yaw1_pid.upplim);
+		this->pid21.SetCmdMin(yaw1_pid.lowlim);
+		this->pid21.SetIMax(yaw1_pid.upplim);
+		this->pid21.SetIMin(yaw1_pid.lowlim);
+		
+		this->pid31.SetPGain(yaw1_pid.kp);
+		this->pid31.SetIGain(yaw1_pid.ki);
+		this->pid31.SetDGain(yaw1_pid.kd);
+		this->pid31.SetCmdMax(yaw1_pid.upplim);
+		this->pid31.SetCmdMin(yaw1_pid.lowlim);
+		this->pid31.SetIMax(yaw1_pid.upplim);
+		this->pid31.SetIMin(yaw1_pid.lowlim);
+
+		this->pid41.SetPGain(yaw1_pid.kp);
+		this->pid41.SetIGain(yaw1_pid.ki);
+		this->pid41.SetDGain(yaw1_pid.kd);
+		this->pid41.SetCmdMax(yaw1_pid.upplim);
+		this->pid41.SetCmdMin(yaw1_pid.lowlim);
+		this->pid41.SetIMax(yaw1_pid.upplim);
+		this->pid41.SetIMin(yaw1_pid.lowlim);
+
+		this->pid12.SetPGain(pitch2_pid.kp);
+		this->pid12.SetIGain(pitch2_pid.ki);
+		this->pid12.SetDGain(pitch2_pid.kd);
+		this->pid12.SetCmdMax(pitch2_pid.upplim);
+		this->pid12.SetCmdMin(pitch2_pid.lowlim);
+		this->pid12.SetIMax(pitch2_pid.upplim);
+		this->pid12.SetIMin(pitch2_pid.lowlim);
+
+		this->pid22.SetPGain(pitch2_pid.kp);
+		this->pid22.SetIGain(pitch2_pid.ki);
+		this->pid22.SetDGain(pitch2_pid.kd);
+		this->pid22.SetCmdMax(pitch2_pid.upplim);
+		this->pid22.SetCmdMin(pitch2_pid.lowlim);
+		this->pid22.SetIMax(pitch2_pid.upplim);
+		this->pid22.SetIMin(pitch2_pid.lowlim);
+
+		this->pid32.SetPGain(pitch2_pid.kp);
+		this->pid32.SetIGain(pitch2_pid.ki);
+		this->pid32.SetDGain(pitch2_pid.kd);
+		this->pid32.SetCmdMax(pitch2_pid.upplim);
+		this->pid32.SetCmdMin(pitch2_pid.lowlim);
+		this->pid32.SetIMax(pitch2_pid.upplim);
+		this->pid32.SetIMin(pitch2_pid.lowlim);
+
+		this->pid42.SetPGain(pitch2_pid.kp);
+		this->pid42.SetIGain(pitch2_pid.ki);
+		this->pid42.SetDGain(pitch2_pid.kd);
+		this->pid42.SetCmdMax(pitch2_pid.upplim);
+		this->pid42.SetCmdMin(pitch2_pid.lowlim);
+		this->pid42.SetIMax(pitch2_pid.upplim);
+		this->pid42.SetIMin(pitch2_pid.lowlim);
+
+		this->pid13.SetPGain(pitch3_pid.kp);
+		this->pid13.SetIGain(pitch3_pid.ki);
+		this->pid13.SetDGain(pitch3_pid.kd);
+		this->pid13.SetCmdMax(pitch3_pid.upplim);
+		this->pid13.SetCmdMin(pitch3_pid.lowlim);
+		this->pid13.SetIMax(pitch3_pid.upplim);
+		this->pid13.SetIMin(pitch3_pid.lowlim);
+
+		this->pid23.SetPGain(pitch3_pid.kp);
+		this->pid23.SetIGain(pitch3_pid.ki);
+		this->pid23.SetDGain(pitch3_pid.kd);
+		this->pid23.SetCmdMax(pitch3_pid.upplim);
+		this->pid23.SetCmdMin(pitch3_pid.lowlim);
+		this->pid23.SetIMax(pitch3_pid.upplim);
+		this->pid23.SetIMin(pitch3_pid.lowlim);
+
+		this->pid33.SetPGain(pitch3_pid.kp);
+		this->pid33.SetIGain(pitch3_pid.ki);
+		this->pid33.SetDGain(pitch3_pid.kd);
+		this->pid33.SetCmdMax(pitch3_pid.upplim);
+		this->pid33.SetCmdMin(pitch3_pid.lowlim);
+		this->pid33.SetIMax(pitch3_pid.upplim);
+		this->pid33.SetIMin(pitch3_pid.lowlim);
+
+		this->pid43.SetPGain(pitch3_pid.kp);
+		this->pid43.SetIGain(pitch3_pid.ki);
+		this->pid43.SetDGain(pitch3_pid.kd);
+		this->pid43.SetCmdMax(pitch3_pid.upplim);
+		this->pid43.SetCmdMin(pitch3_pid.lowlim);
+		this->pid43.SetIMax(pitch3_pid.upplim);
+		this->pid43.SetIMin(pitch3_pid.lowlim);
+
+
+		this->model->GetJointController()->SetPositionPID(this->ID11->GetScopedName(), this->pid11);
+  		this->model->GetJointController()->SetPositionPID(this->ID21->GetScopedName(), this->pid21);
+		this->model->GetJointController()->SetPositionPID(this->ID31->GetScopedName(), this->pid31);
+		this->model->GetJointController()->SetPositionPID(this->ID41->GetScopedName(), this->pid41);
+			
+			this->model->GetJointController()->SetPositionPID(this->ID12->GetScopedName(), this->pid12);
+			this->model->GetJointController()->SetPositionPID(this->ID22->GetScopedName(), this->pid22);
+			this->model->GetJointController()->SetPositionPID(this->ID32->GetScopedName(), this->pid32);
+			this->model->GetJointController()->SetPositionPID(this->ID42->GetScopedName(), this->pid42);
+
+				this->model->GetJointController()->SetPositionPID(this->ID13->GetScopedName(), this->pid13);
+				this->model->GetJointController()->SetPositionPID(this->ID23->GetScopedName(), this->pid23);
+				this->model->GetJointController()->SetPositionPID(this->ID33->GetScopedName(), this->pid33);
+				this->model->GetJointController()->SetPositionPID(this->ID43->GetScopedName(), this->pid43);
 
 	}
 
