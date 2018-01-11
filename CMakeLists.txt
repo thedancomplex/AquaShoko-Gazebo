@@ -10,11 +10,18 @@ project(aquashoko_gazebo)
 find_package(catkin REQUIRED COMPONENTS
  gazebo_ros
  gazebo_msgs
+ message_generation
+ dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(gazebo REQUIRED)
+
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+generate_dynamic_reconfigure_options(
+  cfg/AquashokoJointControlParams.cfg
+)
 
 ###################################
 ## catkin specific configuration ##

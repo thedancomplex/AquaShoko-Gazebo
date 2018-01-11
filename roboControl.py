@@ -41,7 +41,7 @@ import aquashoko
 from std_msgs.msg import String
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
-from aquashoko_ros.cfg import AquashokoJointControlParamsConfig
+from aquashoko_gazebo.cfg import AquashokoJointControlParamsConfig
 from dynamic_reconfigure.server import Server
 import copy
 config_start = False
