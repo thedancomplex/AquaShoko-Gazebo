@@ -1976,5 +1976,13 @@
       <updateRate>50.0</updateRate>
   </plugin>
 
+  <plugin name="odometry_plugin" filename="libgazebo_ros_p3d.so">
+      <bodyName>Baselink</bodyName>
+      <topicName>odometry</topicName>
+      <updateRate>50.0</updateRate>
+  </plugin>
+
+
+
   </model>
 </sdf>
