@@ -58,6 +58,8 @@ import ach
 AQUASHOKO_LEG_NUM = 4
 AQUASHOKO_LEG_JOINT_NUM = 3
 AQUASHOKO_CHAN_REF_NAME = "aquashoko_chan_ref"
+AQUASHOKO_CHAN_PARAM_NAME = "aquashoko_chan_param"
+
 
 class AQUASHOKO_JOINT(Structure):
   _pack_   = 1
@@ -75,25 +77,48 @@ class AQUASHOKO_REF(Structure):
   _fields_ = [
               ("leg", AQUASHOKO_LEG*AQUASHOKO_LEG_NUM)]
 
+class AQUASHOKO_PID(Structure):
+  _pack_   = 1
+  _fields_ = [
+              ("kp", c_double),
+              ("ki", c_double),
+              ("kd", c_double),
+              ("upplim", c_double),
+              ("lowlim", c_double)]
+
+class AQUASHOKO_CONTROLLERS(Structure):
+  _pack_   = 1
+  _fields_ = [
+              ("pids", AQUASHOKO_PID * AQUASHOKO_LEG_JOINT_NUM),]  
 
 
 aquashoko_ref = AQUASHOKO_REF()
+aquashoko_pids = AQUASHOKO_CONTROLLERS()
 aquashoko_chan_ref = None
+aquashoko_chan_param = None
 
 
 def aquashoko_init():
-  global aquashoko_ref, aquashoko_chan_ref
+  global aquashoko_ref, aquashoko_chan_ref, aquashoko_pids, aquashoko_chan_param
   aquashoko_chan_ref = ach.Channel(AQUASHOKO_CHAN_REF_NAME)
   aquashoko_ref = AQUASHOKO_REF()
+  
+  aquashoko_chan_param = ach.Channel(AQUASHOKO_CHAN_PARAM_NAME)
+  aquashoko_pids = AQUASHOKO_CONTROLLERS()
   return 0     
 
 def aquashoko_get(leg, joint):
   global aquashoko_ref, aquashoko_chan_ref
-  return aquashoko_ref.leg[leg].joint[joint].ref
+  return aquashoko_ref.leg[leg].joint[joint].pos
 
 def aquashoko_set(leg, joint, value):
   global aquashoko_ref, aquashoko_chan_ref
   aquashoko_ref.leg[leg].joint[joint].ref = value
+  return 0
+
+def aquashoko_set_pid(joint, value):
+  global aquashoko_pids, aquashoko_chan_param
+  aquashoko_pids.pids[joint] = value
   return 0
 
 def aquashoko_put():
@@ -101,6 +126,10 @@ def aquashoko_put():
   aquashoko_chan_ref.put(aquashoko_ref)
   return 0
 
+def aquashoko_put_pids():
+  global aquashoko_pids, aquashoko_chan_param
+  aquashoko_chan_param.put(aquashoko_pids)
+  return 0
 
 def aquashoko_pull():
   global aquashoko_ref, aquashoko_chan_ref

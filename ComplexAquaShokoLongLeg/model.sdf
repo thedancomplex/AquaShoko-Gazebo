@@ -1,23 +1,33 @@
 <?xml version='1.0'?>
 <sdf version='1.6'>
+
   <model name='ComplexAquaShokoLongLeg'>
+
     <link name='Baselink'>
       <pose frame=''>0 0 0.1 0 -0 0</pose>
       <inertial>
-        <mass>2.55</mass>
+        <mass>2.564</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.062</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.062</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.048</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+      
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+      
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
+      <gravity>1</gravity>
+      
       <visual name='visual'>
         <pose frame=''>0 0 -0.064 0 -0 0</pose>
         <geometry>
@@ -99,17 +109,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn1'>
       <pose frame=''>0.145 0 0.17 0 -0 3.14</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -198,17 +209,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn2'>
       <pose frame=''>0 0.145 0.17 0 0 -1.57</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -297,17 +309,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn3'>
       <pose frame=''>-0.145 0 0.17 0 -0 0</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -396,17 +409,18 @@
         </surface>
       </collision>
     </link>
+
     <link name='HormToHorn4'>
       <pose frame=''>0 -0.145 0.17 0 -0 1.57</pose>
       <inertial>
-        <mass>0.033</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>1e-3</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>1e-3</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>1e-3</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
@@ -495,20 +509,27 @@
         </surface>
       </collision>
     </link>
+
     <link name='endLeg1'>
       <pose frame=''>0.180014 0.009444 0.22 0 -0 0</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -598,17 +619,23 @@
     <link name='endLeg2'>
       <pose frame=''>-0.009528 0.179992 0.22 0 -0 1.57</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -698,17 +725,23 @@
     <link name='endLeg3'>
       <pose frame=''>-0.18 -0.0095 0.22 0 -0 3.14</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -798,17 +831,23 @@
     <link name='endLeg4'>
       <pose frame=''>0.009472 -0.180008 0.22 0 0 -1.57319</pose>
       <inertial>
-        <mass>0.088</mass>
+        <mass>0.095</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.037</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.037</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>2.75e-5</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -898,17 +937,23 @@
     <link name='middleLeg1'>
       <pose frame=''>0.144995 -0.0025 0.312 0 -0 3.14</pose>
       <inertial>
-        <mass>1.39</mass>
+        <mass>1.396</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.079</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.064</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.018</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -944,7 +989,7 @@
         <pose frame=''>0 0 0.064 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.051 0.173 0.424</size>
+            <size>0.051 0.173 0.30</size>
           </box>
         </geometry>
         <surface>
@@ -994,20 +1039,80 @@
         </surface>
       </collision>
     </link>
-    <link name='middleLeg2'>
-      <pose frame=''>0.0025 0.145002 0.312 0 0 -1.57</pose>
+
+
+    <!--link name='middleLeg11'>
+      <pose frame=''>0.144995 -0.0025 0.312 0 -0 3.14</pose>
       <inertial>
-        <mass>1.39</mass>
+        <pose frame=''>0 0.02 0.02 0 0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.0001</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.0001</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+      <enable_wind>0</enable_wind>
+      <gravity>1</gravity>
+      <visual name='visual'>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.051 0.173 0.30</size>
+          </box>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+          <ambient>1 0 0 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+          <specular>0.01 0.01 0.01 1</specular>
+          <emissive>0 0 0 1</emissive>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <transparency>1</transparency>
+        <cast_shadows>1</cast_shadows>
+      </visual>
+      
+    </link-->
+
+    <link name='middleLeg2'>
+      <pose frame=''>0.0025 0.145002 0.312 0 0 -1.57</pose>
+      <inertial>
+        <mass>1.396</mass>
+        <inertia>
+          <ixx>0.079</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.064</iyy>
+          <iyz>0</iyz>
+          <izz>0.018</izz>
+        </inertia>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+      </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -1040,10 +1145,10 @@
       <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0.064 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.051 0.173 0.424</size>
+            <size>0.051 0.173 0.3</size>
           </box>
         </geometry>
         <surface>
@@ -1093,20 +1198,27 @@
         </surface>
       </collision>
     </link>
+
     <link name='middleLeg3'>
       <pose frame=''>-0.145 0.0025 0.312 0 -0 0</pose>
       <inertial>
-        <mass>1.39</mass>
+        <mass>1.396</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.079</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.064</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.018</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -1139,10 +1251,10 @@
       <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0.064 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.051 0.173 0.424</size>
+            <size>0.051 0.173 0.3</size>
           </box>
         </geometry>
         <surface>
@@ -1192,20 +1304,76 @@
         </surface>
       </collision>
     </link>
-    <link name='middleLeg4'>
-      <pose frame=''>-0.0025 -0.144998 0.3129 0 -0 1.57</pose>
+
+    <!--link name='middleLeg31'>
+      <pose frame=''>-0.145 0.0025 0.312 0 -0 0</pose>
       <inertial>
-        <mass>1.39</mass>
+        <pose frame=''>0 0.02 0.02 0 0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>1</ixx>
+          <ixx>0.0001</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>1</iyy>
+          <iyy>0.0001</iyy>
           <iyz>0</iyz>
-          <izz>1</izz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.001</angular>
+      </velocity_decay>
+
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+      <enable_wind>0</enable_wind>
+      <gravity>1</gravity>
+      <visual name='visual'>
+        <pose frame=''>0 0 -0.054 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.051 0.173 0.3</size>
+          </box>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+           <box>
+            <size>0.051 0.173 0.3</size>
+          </box>
+          <ambient>0 0 1 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+          <specular>0.01 0.01 0.01 1</specular>
+          <emissive>0 0 0 1</emissive>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <transparency>1</transparency>
+        <cast_shadows>1</cast_shadows>
+      </visual>
+    </link-->
+
+    <link name='middleLeg4'>
+      <pose frame=''> -0.0025 -0.145 0.312 0 0 1.57</pose>
+      <inertial>
+        <mass>1.396</mass>
+        <inertia>
+          <ixx>0.079</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.064</iyy>
+          <iyz>0</iyz>
+          <izz>0.018</izz>
         </inertia>
         <pose frame=''>0 0 0 0 -0 0</pose>
       </inertial>
+
+      <velocity_decay>
+        <linear>0.01</linear>
+        <angular>0.002</angular>
+      </velocity_decay>
+
       <self_collide>0</self_collide>
       <kinematic>0</kinematic>
       <enable_wind>0</enable_wind>
@@ -1238,10 +1406,10 @@
       <collision name='collision'>
         <laser_retro>0</laser_retro>
         <max_contacts>10</max_contacts>
-        <pose frame=''>0 0 0 0 -0 0</pose>
+        <pose frame=''>0 0 0.064 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.051 0.173 0.424</size>
+            <size>0.051 0.173 0.3</size>
           </box>
         </geometry>
         <surface>
@@ -1291,6 +1459,7 @@
         </surface>
       </collision>
     </link>
+
     <joint name='jaw11' type='revolute'>
       <parent>Baselink</parent>
       <child>HormToHorn1</child>
@@ -1301,14 +1470,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1322,8 +1491,10 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
+
     <joint name='jaw21' type='revolute'>
       <parent>Baselink</parent>
       <child>HormToHorn2</child>
@@ -1334,14 +1505,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1355,8 +1526,10 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
+
     <joint name='jaw31' type='revolute'>
       <parent>Baselink</parent>
       <child>HormToHorn3</child>
@@ -1367,14 +1540,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1388,8 +1561,10 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
+
     <joint name='jaw41' type='revolute'>
       <parent>Baselink</parent>
       <child>HormToHorn4</child>
@@ -1400,14 +1575,14 @@
         <limit>
           <lower>-1.79769e+308</lower>
           <upper>1.79769e+308</upper>
-          <effort>8.4</effort>
+          <effort>10.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1421,8 +1596,10 @@
             <erp>0.8</erp>
           </suspension>
         </ode>
+        <provide_feedback>true</provide_feedback>
       </physics>
     </joint>
+
     <joint name='pitch12' type='revolute'>
       <parent>HormToHorn1</parent>
       <child>middleLeg1</child>
@@ -1431,16 +1608,16 @@
         <xyz>0 1 0</xyz>
         <use_parent_model_frame>0</use_parent_model_frame>
         <limit>
-          <lower>-1.9</lower>
-          <upper>1.9</upper>
-          <effort>8.4</effort>
+          <lower>-4</lower>
+          <upper>4</upper>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1456,6 +1633,13 @@
         </ode>
       </physics>
     </joint>
+
+    <!--joint name='pitch121' type='fixed'>
+      <parent>HormToHorn1</parent>
+      <child>middleLeg11</child>
+      <pose frame=''>0 0 -0.13 0 -0 0</pose>
+    </joint-->
+
     <joint name='pitch13' type='revolute'>
       <parent>middleLeg1</parent>
       <child>endLeg1</child>
@@ -1466,14 +1650,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1499,14 +1683,14 @@
         <limit>
           <lower>-1.9</lower>
           <upper>1.9</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1532,14 +1716,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1555,24 +1739,25 @@
         </ode>
       </physics>
     </joint>
+    
     <joint name='pitch32' type='revolute'>
       <parent>HormToHorn3</parent>
       <child>middleLeg3</child>
-      <pose frame=''>0 0 -0.13 0 -0 0</pose>
+      <pose frame=''> 0 0 -0.13 0 -0 0</pose>
       <axis>
         <xyz>0 1 0</xyz>
         <use_parent_model_frame>0</use_parent_model_frame>
         <limit>
-          <lower>-1.9</lower>
-          <upper>1.9</upper>
-          <effort>8.4</effort>
+          <lower>-4</lower>
+          <upper>4</upper>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1588,6 +1773,14 @@
         </ode>
       </physics>
     </joint>
+
+    <!--joint name='pitch321' type='fixed'>
+      <parent>HormToHorn3</parent>
+      <child>middleLeg31</child>
+      <pose frame=''> 0 0 -0.13 0 -0 0</pose>
+    </joint-->
+
+
     <joint name='pitch33' type='revolute'>
       <parent>middleLeg3</parent>
       <child>endLeg3</child>
@@ -1598,14 +1791,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1621,24 +1814,25 @@
         </ode>
       </physics>
     </joint>
+
     <joint name='pitch42' type='revolute'>
       <parent>HormToHorn4</parent>
       <child>middleLeg4</child>
-      <pose frame=''>0 0 -0.13 0 -0 0</pose>
+      <pose frame=''> 0 0 -0.13 0 -0 0</pose>
       <axis>
         <xyz>0 1 0</xyz>
         <use_parent_model_frame>0</use_parent_model_frame>
         <limit>
           <lower>-1.9</lower>
           <upper>1.9</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1654,6 +1848,7 @@
         </ode>
       </physics>
     </joint>
+
     <joint name='pitch43' type='revolute'>
       <parent>middleLeg4</parent>
       <child>endLeg4</child>
@@ -1664,14 +1859,14 @@
         <limit>
           <lower>-5</lower>
           <upper>0.04</upper>
-          <effort>8.4</effort>
+          <effort>20.0</effort>
           <velocity>-1</velocity>
         </limit>
         <dynamics>
           <spring_reference>0</spring_reference>
-          <spring_stiffness>0</spring_stiffness>
-          <damping>0.002</damping>
-          <friction>0.001</friction>
+          <spring_stiffness>0.0</spring_stiffness>
+          <friction>0.0</friction>
+          <damping>0.2</damping>
         </dynamics>
       </axis>
       <physics>
@@ -1689,13 +1884,105 @@
     </joint>
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
-<!--
-    <plugin name='gazebo_ros_control' filename='libgazebo_ros_control.so'>
-        <robotNamespace>/aquashoko</robotNamespace>
-    </plugin>
--->
 
-       <plugin name='roboControl' filename='/home/hubo/project/AquaShoko-Gazebo/build/libroboControl.so'/>
+  <plugin name='joint_control' filename='libaquashoko_gazebo_joint_control.so'/>
+
+   <plugin name="BuoyancyPlugin" filename="libBuoyancyPlugin.so">
+    <fluid_density>1000</fluid_density>
+    
+    <link name="Baselink">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>0.001</volume>  <!-- 0.002564 -->
+    </link>
+
+     <link name="HormToHorn1">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="HormToHorn2">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="HormToHorn3">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="HormToHorn4">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="middleLeg1">
+      <center_of_volume>0 0.02 0.02 </center_of_volume>
+      <volume> 0.001494</volume>
+    </link>
+
+    <!--link name="middleLeg11">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume> 1e-20 </volume>
+    </link-->
+
+    <!--link name="middleLeg31">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume> 1e-20 </volume>
+    </link-->
+
+    <link name="middleLeg2">
+      <center_of_volume>0 0.02 0.02 </center_of_volume>
+      <volume>0.001494</volume>
+    </link>
+
+    <link name="middleLeg3">
+      <center_of_volume>0 0.02 0.02 </center_of_volume>
+      <volume>0.001494</volume>
+    </link>
+
+    <link name="middleLeg4">
+      <center_of_volume>0 0.02 0.02 </center_of_volume>
+      <volume>0.001494</volume>
+    </link>
+
+    <link name="endLeg1">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="endLeg2">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="endLeg3">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+    <link name="endLeg4">
+      <center_of_volume>0 0 0 </center_of_volume>
+      <volume>1e-20</volume>
+    </link>
+
+  </plugin>
+
+  <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <bodyName>Baselink</bodyName>
+      <topicName>imu</topicName>
+      <serviceName>imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>50.0</updateRate>
+  </plugin>
+
+  <plugin name="odometry_plugin" filename="libgazebo_ros_p3d.so">
+      <bodyName>Baselink</bodyName>
+      <topicName>odometry</topicName>
+      <updateRate>50.0</updateRate>
+  </plugin>
+
+
 
   </model>
 </sdf>
